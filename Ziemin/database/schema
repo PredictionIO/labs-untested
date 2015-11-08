@@ -1,0 +1,175 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: conversions; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+CREATE TABLE conversions (
+    user_id integer,
+    item_id bigint,
+    price double precision,
+    quantity integer,
+    conv_time timestamp without time zone
+);
+
+
+ALTER TABLE conversions OWNER TO ziemin;
+
+--
+-- Name: features; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+CREATE TABLE features (
+    user_id integer NOT NULL,
+    y double precision DEFAULT 0,
+    first_week double precision DEFAULT 0,
+    conv_count integer DEFAULT 0,
+    avg_conv_price double precision DEFAULT 0,
+    first_day double precision DEFAULT 0,
+    avg_conv_time integer,
+    views_count integer DEFAULT 0,
+    avg_view_price double precision DEFAULT 0,
+    viewed_bought_count integer DEFAULT 0,
+    has_seen_ad integer DEFAULT 0,
+    country character varying(40),
+    regist_day_of_year integer
+);
+
+
+ALTER TABLE features OWNER TO ziemin;
+
+--
+-- Name: items; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+CREATE TABLE items (
+    item_id bigint NOT NULL,
+    style bigint,
+    personality bigint,
+    color bigint,
+    theme bigint,
+    price double precision,
+    category bigint
+);
+
+
+ALTER TABLE items OWNER TO ziemin;
+
+--
+-- Name: user_ads; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+CREATE TABLE user_ads (
+    user_id integer,
+    utm_source bigint,
+    utm_campaign bigint,
+    utm_medium bigint,
+    utm_term bigint,
+    utm_content bigint
+);
+
+
+ALTER TABLE user_ads OWNER TO ziemin;
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+CREATE TABLE users (
+    user_id integer NOT NULL,
+    country character varying(50),
+    register_time timestamp without time zone
+);
+
+
+ALTER TABLE users OWNER TO ziemin;
+
+--
+-- Name: views; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+CREATE TABLE views (
+    user_id integer,
+    item_id bigint,
+    view_time timestamp without time zone,
+    pagetype character varying(40)
+);
+
+
+ALTER TABLE views OWNER TO ziemin;
+
+--
+-- Name: features_pkey; Type: CONSTRAINT; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+ALTER TABLE ONLY features
+    ADD CONSTRAINT features_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: items_pkey; Type: CONSTRAINT; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+ALTER TABLE ONLY items
+    ADD CONSTRAINT items_pkey PRIMARY KEY (item_id);
+
+
+--
+-- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: features_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ziemin
+--
+
+ALTER TABLE ONLY features
+    ADD CONSTRAINT features_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
