@@ -1,0 +1,18 @@
+data for 7 days -> expected revenue for 30 days
+
+scratch below
+=============
+
+properties of a user:
+revenue
+bought items (with timestamp, quantity and price)
+ - reduced to category (?)
+ad for user registration
+items viewed by user (with timestamp)
+
+properties of group of users:
+distribution of revenue (fixed time range?)
+distribution of ads for registration
+distribution of bought items (fixed time range?)
+distribution of viewed items (fixed time range?)
+
