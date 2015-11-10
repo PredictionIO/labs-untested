@@ -1,0 +1,139 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: conversions; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE conversions (
+    user_id bigint,
+    item_id bigint,
+    price real,
+    quantity integer,
+    "timestamp" timestamp without time zone
+);
+
+
+ALTER TABLE conversions OWNER TO postgres;
+
+--
+-- Name: features; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE features (
+    user_id integer,
+    hour_revenue double precision,
+    week_revenue double precision,
+    items_bought integer,
+    adds_count integer,
+    categories_bought integer,
+    categories_seen integer,
+    discount_ratio double precision,
+    month_revenue double precision
+);
+
+
+ALTER TABLE features OWNER TO postgres;
+
+--
+-- Name: items; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE items (
+    item_id bigint NOT NULL,
+    style bigint,
+    personality bigint,
+    color bigint,
+    theme bigint,
+    price real,
+    category bigint
+);
+
+
+ALTER TABLE items OWNER TO postgres;
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE users (
+    user_id bigint NOT NULL,
+    register_country character varying(40),
+    signup_time timestamp without time zone
+);
+
+
+ALTER TABLE users OWNER TO postgres;
+
+--
+-- Name: views; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE views (
+    user_id bigint,
+    item_id bigint,
+    "timestamp" timestamp without time zone,
+    page_type character varying
+);
+
+
+ALTER TABLE views OWNER TO postgres;
+
+--
+-- Name: item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY items
+    ADD CONSTRAINT item_pkey PRIMARY KEY (item_id);
+
+
+--
+-- Name: user_acc_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT user_acc_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

@@ -3,4 +3,4 @@ Code Sprint Summary:
 - discovered and got rid of inconsistencies in the data set
 - created features using SQL queries
 - testing a simple model based on the linear regression (scikit-learn)
-- compared an accuracy of the created model with some other ones (taking an average, ...) 
+- compared an accuracy of the created model with some other (simple) ones
