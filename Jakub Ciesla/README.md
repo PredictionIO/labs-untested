@@ -6,3 +6,6 @@ Some useful SQL queries which were used to create features for ML.
 
 test_db.out
 Database dump.
+
+ML.py
+Set of tests with different ML methods.
