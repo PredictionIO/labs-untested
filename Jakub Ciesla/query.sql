@@ -61,3 +61,5 @@ UPDATE features
 SET views = 0
 WHERE views is null;
 
+--create file with features
+Copy (Select * From features) To '/tmp/test.csv' With CSV;
