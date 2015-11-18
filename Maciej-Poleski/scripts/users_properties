@@ -1,0 +1,11 @@
+﻿select users."userId",
+"utmContent",
+first_action,
+first_buy,
+revenue_in_7days,
+revenue_in_30days
+from users 
+left join users_revenue_register on (users."userId"=users_revenue_register."userId")
+left join user_ads on (users."userId"=user_ads."userId")
+left join users_firstaction on (users."userId"=users_firstaction."userId")
+left join users_firstbuy on (users."userId"=users_firstbuy."userId");

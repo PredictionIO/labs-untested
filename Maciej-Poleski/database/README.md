@@ -4,3 +4,7 @@
 4. Script to recreate all views - to be executed *after* data is imported.
 
 3 and 4 are combined - views will be empty - recreate after data import is finished
+
+
+You can always invoke this script to clean database and recreate schema with all views.
+Then import data from csv files and refresh materialized views.
