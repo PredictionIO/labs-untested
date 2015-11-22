@@ -1,5 +1,6 @@
 import numpy as np
-from data import shuffle, devide
+from data import shuffle, devide, column_indexes
+from sklearn import linear_model
 
 # minimum squared error metric
 def mse_metric(out, y):
@@ -69,3 +70,19 @@ class FirstWeekCopyModel:
     def predict(self, x_test):
         m_array = x_test[:, self.fw_col_num]
         return m_array
+
+# --- models instances -------------------------
+linear_regr = linear_model.LinearRegression(normalize=True, n_jobs=-1)
+linear_regr.name = "Linear regression"
+
+ridge_regr = linear_model.Ridge(alpha=0.1, normalize=True)
+ridge_regr.name = "Ridge regression"
+
+lasso = linear_model.Lasso(alpha=0.1, normalize=True)
+lasso.name = "Lasso"
+
+bayes_regr = linear_model.BayesianRidge(normalize=True)
+bayes_regr.name = "Bayesian regression"
+
+average = AverageModel()
+first_week = FirstWeekCopyModel(column_indexes["first_week"])

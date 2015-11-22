@@ -1,0 +1,10 @@
+21.11.2015 Different models - run_regr_models.py with 10 iters
+Reading data ...
+Testing models ...
+Errors:
+MSE of First Week Copy = 2894.3155977356537
+MSE of Ridge regression = 1804.577358077947
+MSE of Average = 4343.2296641994435
+MSE of Linear regression = 1686.3774201226363
+MSE of Lasso = 4343.2296641994435
+MSE of Bayesian regression = 1686.3806508465696

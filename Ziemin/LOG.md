@@ -10,3 +10,8 @@
 - code refactoring. created python library to check different models and print some
   statistics more comfortably
 - checked correlations between used features (stats.py prints appropriate plot)
+
+## 21.11.2015
+- tried to check different approaches towards feature selection
+- saved some outputs not to generate them over and over again
+- saved plots (feature correlation, RFECV features performance)

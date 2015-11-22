@@ -19,6 +19,9 @@ column_names = [
 # reversed bindings
 column_indexes = {column_names[i]:i for i in range(len(column_names))}
 
+# currently used columns
+curr_cols = [2,3,4,5,7,8,9,10,12]
+
 # returns randomly shuffled features and results arrays in a consistent way
 def shuffle(x_array, y_array):
     c = np.c_[x_array.reshape(len(x_array), -1), y_array.reshape(len(y_array), -1)]

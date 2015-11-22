@@ -2,10 +2,9 @@
 import numpy as np
 import sys
 from matplotlib import pyplot as plt
-from prepare_files import usecols
-from data import column_names
+from data import column_names, curr_cols
 
-labels = [column_names[i] for i in usecols]
+labels = [column_names[i] for i in curr_cols] + ["y"]
 
 # returns correlation coefficients matrix
 def correlations(x_array):
@@ -13,12 +12,14 @@ def correlations(x_array):
 
 if __name__ == "__main__":
     x_file = sys.argv[1]
+    y_file = sys.argv[2]
     x_array = np.load(x_file)
-    cors = correlations(x_array)
+    y_array = np.load(y_file)
+    cors = correlations(np.c_[x_array, y_array])
 
     # print correlation matrix between used features
     plt.matshow(cors, cmap=plt.cm.Blues)
-    plt.title("Features correlations")
-    plt.xticks(np.arange(len(usecols)), labels)
-    plt.yticks(np.arange(len(usecols)), labels)
+    plt.title("Features correlations (with result also)")
+    plt.xticks(np.arange(len(curr_cols)+1), labels)
+    plt.yticks(np.arange(len(curr_cols)+1), labels)
     plt.show()
