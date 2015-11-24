@@ -15,3 +15,9 @@
 - tried to check different approaches towards feature selection
 - saved some outputs not to generate them over and over again
 - saved plots (feature correlation, RFECV features performance)
+
+## 24.11.2015
+- further analysis of features (random forest regressor, variances)
+- created some new plots to visualize different aspects of prepared features
+- next step would be looking into different methods of model evaluation
+  and creating some pipelines using only subsets of features with different scalings

@@ -39,3 +39,17 @@ conv_count:    1038189.780
 avg_conv_price:    3381668.187
 first_day:    3400645.938
 first_week:    9928384.584
+
+24.11.2015 RandomForestRegressor
+Reading data ...
+Used features:  ['first_week', 'conv_count', 'avg_conv_price', 'first_day', 'views_count', 'avg_view_price', 'viewed_bought_count', 'has_seen_ad', 'regist_day_of_year']
+Feature ranking (random tree regressor - 20 estimators):
+1 feature first_week (0.7211256911446042)
+2 feature avg_view_price (0.18187515862008707)
+3 feature regist_day_of_year (0.04369332130951751)
+4 feature views_count (0.03178800133925817)
+5 feature avg_conv_price (0.0064196775730157125)
+6 feature first_day (0.005070820825327579)
+7 feature conv_count (0.004493806609222431)
+8 feature has_seen_ad (0.0029748719097074)
+9 feature viewed_bought_count (0.0025586506692598003)
