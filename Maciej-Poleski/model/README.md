@@ -1,6 +1,7 @@
 Scratching basic requirements for predictive model
 
-Two scripts in python estimating revenue after 30 days on set of users who ever bought something
+Two scripts in python estimating revenue after 30 days on set of users who ever bought something.
+Both of them require 'input_data.csv' - exported 'users_features' view from database (database/)
 
 simple.py - Apply Ordinary Least Squares model (var = 0.64)
 ridge.py - Apply Ridge Regression model (var = 0.64)
