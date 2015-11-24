@@ -3,6 +3,12 @@ data for 7 days -> expected revenue for 30 days
 try to estimate expected revenue for 30 days assuming (data for 7 days)
 linear regression on some random variables is one of possible approaches (hope not the only one...)
 
+estimations
+===========
+
+Only for users who bought something
+
+
 scratch below
 =============
 
