@@ -6,3 +6,9 @@
 18.11.2015:
 - Updated database schema
 - Collecting evidence for each user (to be used by estimation engine)
+
+24.11.2015
+- Updated database schema
+- Exported sample data (group of ~150000 users - users who commited any transaction)
+- Commited two simples linear regression tools on them (in model/)
+- Comments written in model/README.md
