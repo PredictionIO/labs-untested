@@ -21,3 +21,10 @@
 - created some new plots to visualize different aspects of prepared features
 - next step would be looking into different methods of model evaluation
   and creating some pipelines using only subsets of features with different scalings
+
+## 29.11.2015
+- checked different regression models - nearly all of them did poorly or at least worse
+  than simple linear regression in combination with pca, feature selection, scaling 
+  and polynomial features
+- tried to look at data differently - created some cross validation prediction plots
+- identified some groups of users with KMeans

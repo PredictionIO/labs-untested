@@ -137,6 +137,17 @@ def plot_feature_variances(x_array, y_array):
     plt.show()
 
 
+def plot_feature_correlations(x_array, y_array):
+    cors = np.corrcoef(np.c_[x_array, y_array], rowvar=0)
+    # print correlation matrix between used features
+    labels = [data.column_names[i] for i in data.curr_cols] + ["y"]
+    plt.matshow(cors, cmap=plt.cm.Blues)
+    plt.title("Features correlations (with result also)")
+    plt.xticks(np.arange(len(data.curr_cols)+1), labels)
+    plt.yticks(np.arange(len(data.curr_cols)+1), labels)
+    plt.show()
+
+
 # Usage: ./features.py <x_array.npy> <y_array.npy>
 # x_array.npy - features array
 # y_array.npy - results array
@@ -151,7 +162,8 @@ if __name__ == "__main__":
     print("Used features: ", [data.column_names[i] for i in data.curr_cols])
 
     # plot_feature_importances(x_array, y_array)
-    plot_feature_variances(x_array, y_array)
+    # plot_feature_variances(x_array, y_array)
+    plot_feature_correlations(x_array, y_array)
 
     # print("Executing selector: ", RFECVSelection.name)
     # rfecv = RFECVSelection(x_array, y_array, models.linear_regr, data.curr_cols)
