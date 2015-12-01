@@ -3,7 +3,7 @@
 import numpy;
 from sklearn import linear_model
 
-data = numpy.loadtxt('input_data.csv',delimiter=',')
+data = numpy.loadtxt('input_data_shuffled.csv',delimiter=',')
 size = len(data)
 testSize = size*80/100
 
