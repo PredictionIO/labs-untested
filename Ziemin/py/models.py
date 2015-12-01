@@ -1,8 +1,10 @@
 import numpy as np
 from data import shuffle, devide, column_indexes
 from sklearn import linear_model, pipeline, cross_validation, kernel_ridge, \
-        svm, tree, ensemble, isotonic
+        svm, tree, ensemble, isotonic, naive_bayes
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.cluster import KMeans, MiniBatchKMeans, DBSCAN
+from sklearn.preprocessing import PolynomialFeatures
 
 
 # Trains model on the train set
@@ -94,6 +96,143 @@ class ModelCombinator(BaseEstimator):
         return { "estimators": self.estimators_, "reducer": self.reducer_ }
 
 
+# runs KMeans clustering on features and then trains separately reducers for every cluster
+class ClusteringEnsemble(BaseEstimator):
+
+    def __init__(self, estimator_const=linear_model.LinearRegression, n_clusters=2):
+        self.estimator_const_ = estimator_const
+        self.n_clusters_ = n_clusters
+        self.clustering = MiniBatchKMeans(n_clusters=self.n_clusters_)
+
+    def get_params(self, deep=True):
+        return { "n_clusters": self.n_clusters_}
+
+    def fit(self, X, y):
+        print("Training KMeans")
+        colors = self.clustering.fit_predict(X).reshape(X.shape[0])
+
+        print("Training Estimators")
+        # each estimator is assigned to one cluster
+        self.estimators = [self.estimator_const_() for i in range(self.n_clusters_)]
+        for i in range(self.n_clusters_):
+            rows = colors == i
+            self.estimators[i].fit(X[rows], y[rows])
+
+    def predict(self, X):
+        y = np.zeros(X.shape[0])
+        print("Predicting clusters")
+        colors = self.clustering.predict(X)
+
+        print("Estimating results")
+        for i in range(self.n_clusters_):
+            rows = colors == i
+            y[rows] = self.estimators[i].predict(X[rows])
+
+        return y
+
+
+# trains only on positive views_count
+class FirstWeek0Ensemble(BaseEstimator):
+
+    def __init__(self, estimator_const=linear_model.LinearRegression):
+        self.estimator_const_ = estimator_const
+
+    def get_params(self, deep=True):
+        return {}
+
+    def fit(self, X, y):
+        bad = X[:, 4] == 0
+        good = X[:, 4] > 0
+
+        print("Training Estimators")
+        self.good_estimator = self.estimator_const_()
+        self.bad_estimator = self.estimator_const_()
+        if(y[good].size > 0):
+            self.good_estimator.fit(X[good], y[good])
+        if(y[bad].size > 0):
+            self.bad_estimator.fit(X[bad], y[bad])
+
+
+    def predict(self, X):
+        y = X[:, 0].reshape(X.shape[0])
+        bad = X[:, 4] == 0
+        good = X[:, 4] > 0
+
+        print("Estimating results")
+        if(y[good].size > 0):
+            y[good] = self.good_estimator.predict(X[good])
+
+        return y
+
+
+# trains model only for samples classified as 1
+class LogisticRegressionSeparator(BaseEstimator):
+
+    def get_params(self, deep=True):
+        return {}
+
+    def fit(self, X, y):
+        # lets predict which users will spend anything later
+        classes = y - X[:, 0]
+        classes = np.where(classes > 0.1, 1, 0)
+
+        self.classifier = linear_model.LogisticRegression(
+                class_weight='balanced')
+
+        self.classifier.fit(X, classes)
+        results = self.classifier.predict(X)
+        results = results == 1
+
+        self.estimator = linear_model.Ridge(alpha=0.05)
+        self.estimator.fit(X[results], y[results])
+
+    def predict(self, X):
+        y = X[:,0].reshape(X.shape[0])
+        labels = (self.classifier.predict(X) == 1)
+        y[labels] = self.estimator.predict(X[labels])
+        return y
+
+
+class NoveltySeparator(BaseEstimator):
+
+    def get_params(self, deep=True):
+        return {}
+
+    def fit(self, X, y):
+        # lets treat users spending something in the rest of the month as outliers
+        inliers = y - X[:, 0]
+        inliers = np.where(inliers < 0.1, True, False)
+
+        self.detector = svm.OneClassSVM(nu=0.05, cache_size=2000, verbose=True)
+
+        # training only on inliers
+        print("Training detector")
+        self.detector.fit(X[inliers])
+        results = self.detector.predict(X).reshape(X.shape[0])
+        # predicted
+        inliers = results == 1
+        outliers = results == -1
+
+        print("Training estimators")
+        self.est_inliers = linear_model.Ridge(alpha=0.05)
+        self.est_outliers = linear_model.Ridge(alpha=0.05)
+        self.est_inliers.fit(X[inliers], y[inliers])
+        self.est_inliers.fit(X[outliers], y[outliers])
+
+    def predict(self, X):
+
+        y = np.zeros(X.shape[0])
+
+        labels = self.detector.predict(X).reshape(X.shape[0])
+        inliers = lables == 1
+        outliers = lables == -1
+
+        y[inliers] = self.est_inliers.predict(X[inliers])
+        y[outliers] = self.est_outliers.predict(X[outliers])
+
+        return y
+
+
 # --- models instances -------------------------
 linear_regr = linear_model.LinearRegression(n_jobs=-1)
 linear_regr.name = "Linear regression"
@@ -161,6 +300,12 @@ bagging_lin_regr.name = "Bagging linear regression"
 bagging_decision_tree = ensemble.BaggingRegressor(tree.DecisionTreeRegressor())
 bagging_decision_tree.name = "Bagging dec tree regressor"
 
+clustering_lin_regr = ClusteringEnsemble()
+clustering_lin_regr.name = "Clustered Linear Regression"
+
+first_week_ensemble_regr = FirstWeek0Ensemble()
+first_week_ensemble_regr.name = "First Week based ensemble - Linear Regression"
+
 combiner_regr = ModelCombinator(
         [
             linear_model.Ridge(alpha=0.05),
@@ -168,3 +313,9 @@ combiner_regr = ModelCombinator(
         ],
         linear_regr)
 combiner_regr.name = "Combiner"
+
+logistic_separator_regr = LogisticRegressionSeparator()
+logistic_separator_regr.name = "Logistic regression separator - LinRegr"
+
+novelty_separator_regr = NoveltySeparator()
+novelty_separator_regr.name = "Novelty separator regression - LinRegr"
