@@ -7,7 +7,7 @@ from sklearn.cross_validation import ShuffleSplit, KFold
 from sklearn.feature_selection import RFECV, SelectKBest, \
         SelectFromModel, f_regression
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
+from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures, StandardScaler
 from sklearn.decomposition import PCA
 import sys
 
@@ -32,8 +32,12 @@ ms = [
        # models.elastic_net_regr,
        # models.sgd_regr,
        # models.isotonic_regr,
-       models.bagging_lin_regr,
+       # models.bagging_lin_regr,
        # models.bagging_decision_tree,
+       # models.clustering_lin_regr,
+       # models.first_week_ensemble_regr,
+       # models.logistic_separator_regr,
+       models.novelty_separator_regr,
        ]
 
 def get_cv_iterators(n):
@@ -96,8 +100,15 @@ if __name__ == "__main__":
     x_array = np.load(x_file)
     y_array = np.load(y_file)
 
+    # check models only on some subsets
+    #cond = (x_array[:,4] != 0).reshape(x_array.shape[0])
+    #x_array = x_array[cond]
+    #y_array = y_array[cond]
+
+
     chain = [
-                ("minmaxscaler", MinMaxScaler()),
+                # ("minmaxscaler", MinMaxScaler()),
+                ("standardizer", StandardScaler()),
                 # ("feature selection", SelectKBest(f_regression, k=4)),
                 # ("pca", PCA(1)),
                 # ("poly features", PolynomialFeatures(2))
@@ -108,7 +119,7 @@ if __name__ == "__main__":
     tester = models.RegressionModelTester(
             x_array, y_array,
             'mean_squared_error',
-            lambda: get_cv_iterators(x_array.shape[0])["KFold"])
+            lambda: get_cv_iterators(x_array.shape[0])["KFold_shuffle"])
     errors = tester.run_models(ms)
 
     print("Errors:")

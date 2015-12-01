@@ -27,5 +27,5 @@ if __name__ == '__main__':
     x_array = np.load(x_file)
     y_array = np.load(y_file)
 
-    plot_cross_val_preds(x_array, y_array, models.random_forest_regressor)
+    plot_cross_val_preds(x_array, y_array, models.clustering_lin_regr)
 

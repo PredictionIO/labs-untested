@@ -5,8 +5,11 @@ from matplotlib import pyplot as plt
 from data import column_names, curr_cols
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans, AgglomerativeClustering, MeanShift, DBSCAN
+from sklearn.preprocessing import MinMaxScaler, normalize, scale
+import data
 
 def plot_two_dim_features(X):
+    X = scale(X)
     p = PCA(n_components=2)
     X_new = p.fit_transform(X)
     plt.figure()
@@ -23,6 +26,7 @@ def plot_histogram(y, cumulative=False):
 
 def plot_clusters_kmeans(X):
     print("Calculating clusters")
+    X = scale(X)
     y_pred = KMeans(n_clusters=3).fit_predict(X)
 
     print("PCA reduction")
@@ -31,8 +35,24 @@ def plot_clusters_kmeans(X):
 
     print("Printing plots")
     plt.figure()
-    plt.title("KMeans clusters - 3")
+    plt.title("KMeans clusters - normalized - 3")
     plt.scatter(X_new[:, 0], X_new[:, 1], c=y_pred)
+    plt.show()
+
+def plot_two_dim_features_with_zeros(X):
+    colors = X[:, data.column_indexes['y']]
+    colors = np.where(colors == 0, 0, 1)
+    colors.reshape(colors.size, )
+    print(colors.shape)
+    X = scale(X)
+
+    p = PCA(n_components=2)
+    X_new = p.fit_transform(X)
+    plt.figure()
+    plt.legend()
+    plt.title("Features distribution with zeros after PCA 2")
+    plt.scatter(X_new[: ,0], X_new[: ,1], c=colors)
+
     plt.show()
 
 
@@ -45,4 +65,5 @@ if __name__ == "__main__":
     # plot_two_dim_features(x_array)
     # plot_histogram(y_array, False)
     # plot_histogram(y_array, True)
-    plot_clusters_kmeans(x_array)
+    # plot_clusters_kmeans(x_array)
+    plot_two_dim_features_with_zeros(x_array)
