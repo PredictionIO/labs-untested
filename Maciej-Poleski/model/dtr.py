@@ -7,7 +7,7 @@ data = numpy.loadtxt('input_data_reduced_shuffled.csv',delimiter=',')
 size = len(data)
 testSize = size*80/100
 
-data_X = data[:, [0, 1]]
+data_X = data[:, [0, 1, 3, 4, 5]]
 data_X_train = data_X[:-testSize]
 data_X_test = data_X[-testSize:]
 
