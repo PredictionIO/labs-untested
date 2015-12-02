@@ -1,10 +1,10 @@
 import numpy as np
 from data import shuffle, devide, column_indexes
-from sklearn import linear_model
-
-# minimum squared error metric
-def mse_metric(out, y):
-    return np.mean((out - y) ** 2)
+from sklearn import linear_model, pipeline, cross_validation, kernel_ridge, \
+        svm, tree, ensemble, isotonic, naive_bayes
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.cluster import KMeans, MiniBatchKMeans, DBSCAN
+from sklearn.preprocessing import PolynomialFeatures
 
 
 # Trains model on the train set
@@ -17,33 +17,29 @@ def try_regr_model(model, x_train, y_train, x_test, y_test, metric):
 # given input data instance of this class runs different models
 class RegressionModelTester:
 
-    def __init__(self, x_array, y_array, metric):
+    def __init__(self, x_array, y_array, metric, cv_iter_provider):
         self.x_array = x_array
         self.y_array = y_array
         self.metric = metric
+        self.cv_iter_provider = cv_iter_provider
 
-    # @param iter is the number of iterations
     # trains models on some training subset and then tries to predict
     # results on the testing subset
-    # @return a dictionary (model_name, average MSE)
-    def run_models(self, models, iters=1):
-        errors = { m.name:0.0 for m in models }
-
-        for i in range(iters):
-            arr_x, arr_y = shuffle(self.x_array, self.y_array)
-            x_train, y_train, x_test, y_test = devide(arr_x, arr_y, 0.75)
-
-            for m in models:
-                errors[m.name] += try_regr_model(
-                            m, x_train, y_train, x_test, y_test, self.metric)
+    # @return a dictionary (model_name, (average score, score std))
+    def run_models(self, models):
+        errors = { }
 
         for m in models:
-            errors[m.name] /= iters
+            print("Checking model: ", m.name)
+            scores = cross_validation.cross_val_score(
+                    m, self.x_array, self.y_array,
+                    scoring=self.metric, cv=self.cv_iter_provider())
+            errors[m.name] = (scores.mean(), scores.std()*2)
 
         return errors
 
 # Basic model returning always an average from the train set
-class AverageModel:
+class AverageModel(BaseEstimator):
 
     def __init__(self):
         self.name = "Average"
@@ -57,7 +53,7 @@ class AverageModel:
         return m_array
 
 # Basic model returning always the result of the first week
-class FirstWeekCopyModel:
+class FirstWeekCopyModel(BaseEstimator):
 
     # takes the number of the column representing the first week
     def __init__(self, fw_col_num):
@@ -71,12 +67,205 @@ class FirstWeekCopyModel:
         m_array = x_test[:, self.fw_col_num]
         return m_array
 
+# combines results from different models and then returns them as features
+class ModelCombinator(BaseEstimator):
+
+    def __init__(self, estimators, reducer):
+        self.estimators_ = estimators
+        self.reducer_ = reducer
+
+    def fit(self, X, y):
+        preds = []
+        for e in self.estimators_:
+            e.fit(X, y)
+            preds.append(e.predict(X))
+            preds[-1] = preds[-1].reshape(preds[-1].shape[0], 1)
+        new_features = np.concatenate(preds, axis=1)
+        self.reducer_.fit(new_features, y)
+        print(self.reducer_.coef_)
+
+    def predict(self, X):
+        results = []
+        for e in self.estimators_:
+            results.append(e.predict(X))
+            results[-1] = results[-1].reshape(results[-1].shape[0], 1)
+        new_features = np.concatenate(results, axis=1)
+        return self.reducer_.predict(new_features)
+
+    def get_params(self, deep=True):
+        return { "estimators": self.estimators_, "reducer": self.reducer_ }
+
+
+# runs KMeans clustering on features and then trains separately reducers for every cluster
+class ClusteringEnsemble(BaseEstimator):
+
+    def __init__(self, estimator_const=linear_model.LinearRegression, n_clusters=2):
+        self.estimator_const_ = estimator_const
+        self.n_clusters_ = n_clusters
+        self.clustering = MiniBatchKMeans(n_clusters=self.n_clusters_)
+
+    def get_params(self, deep=True):
+        return { "n_clusters": self.n_clusters_}
+
+    def fit(self, X, y):
+        print("Training KMeans")
+        colors = self.clustering.fit_predict(X).reshape(X.shape[0])
+
+        print("Training Estimators")
+        # each estimator is assigned to one cluster
+        self.estimators = [self.estimator_const_() for i in range(self.n_clusters_)]
+        for i in range(self.n_clusters_):
+            rows = colors == i
+            self.estimators[i].fit(X[rows], y[rows])
+
+    def predict(self, X):
+        y = np.zeros(X.shape[0])
+        print("Predicting clusters")
+        colors = self.clustering.predict(X)
+
+        print("Estimating results")
+        for i in range(self.n_clusters_):
+            rows = colors == i
+            y[rows] = self.estimators[i].predict(X[rows])
+
+        return y
+
+
+# trains only on positive views_count
+class FirstWeek0Ensemble(BaseEstimator):
+
+    def __init__(self, estimator_const=linear_model.LinearRegression):
+        self.estimator_const_ = estimator_const
+
+    def get_params(self, deep=True):
+        return {}
+
+    def fit(self, X, y):
+        bad = X[:, 4] == 0
+        good = X[:, 4] > 0
+
+        print("Training Estimators")
+        self.good_estimator = self.estimator_const_()
+        self.bad_estimator = self.estimator_const_()
+        if(y[good].size > 0):
+            self.good_estimator.fit(X[good], y[good])
+        if(y[bad].size > 0):
+            self.bad_estimator.fit(X[bad], y[bad])
+
+
+    def predict(self, X):
+        y = X[:, 0].reshape(X.shape[0])
+        bad = X[:, 4] == 0
+        good = X[:, 4] > 0
+
+        print("Estimating results")
+        if(y[good].size > 0):
+            y[good] = self.good_estimator.predict(X[good])
+
+        return y
+
+
+# trains model only for samples classified as 1
+class LogisticRegressionSeparator(BaseEstimator):
+
+    def get_params(self, deep=True):
+        return {}
+
+    def fit(self, X, y):
+        # lets predict which users will spend anything later
+        classes = y - X[:, 0]
+        classes = np.where(classes > 0.1, 1, 0)
+
+        self.classifier = linear_model.LogisticRegression(
+                class_weight='balanced')
+
+        self.classifier.fit(X, classes)
+        results = self.classifier.predict(X)
+        results = results == 1
+
+        self.estimator = linear_model.Ridge(alpha=0.05)
+        self.estimator.fit(X[results], y[results])
+
+    def predict(self, X):
+        y = X[:,0].reshape(X.shape[0])
+        labels = (self.classifier.predict(X) == 1)
+        y[labels] = self.estimator.predict(X[labels])
+        return y
+
+
+class NoveltySeparator(BaseEstimator):
+
+    def get_params(self, deep=True):
+        return {}
+
+    def fit(self, X, y):
+        # lets treat users spending something in the rest of the month as outliers
+        inliers = y - X[:, 0]
+        inliers = np.where(inliers < 0.1, True, False)
+
+        self.detector = svm.OneClassSVM(nu=0.05, cache_size=2000, verbose=True)
+
+        # training only on inliers
+        print("Training detector")
+        self.detector.fit(X[inliers])
+        results = self.detector.predict(X).reshape(X.shape[0])
+        # predicted
+        inliers = results == 1
+        outliers = results == -1
+
+        print("Training estimators")
+        self.est_inliers = linear_model.Ridge(alpha=0.05)
+        self.est_outliers = linear_model.Ridge(alpha=0.05)
+        self.est_inliers.fit(X[inliers], y[inliers])
+        self.est_inliers.fit(X[outliers], y[outliers])
+
+    def predict(self, X):
+
+        y = np.zeros(X.shape[0])
+
+        labels = self.detector.predict(X).reshape(X.shape[0])
+        inliers = lables == 1
+        outliers = lables == -1
+
+        y[inliers] = self.est_inliers.predict(X[inliers])
+        y[outliers] = self.est_outliers.predict(X[outliers])
+
+        return y
+
+
 # --- models instances -------------------------
-linear_regr = linear_model.LinearRegression(normalize=True, n_jobs=-1)
+linear_regr = linear_model.LinearRegression(n_jobs=-1)
 linear_regr.name = "Linear regression"
 
 ridge_regr = linear_model.Ridge(alpha=0.1, normalize=True)
 ridge_regr.name = "Ridge regression"
+
+ridge_regr_cv = linear_model.RidgeCV(
+        alphas=[0.005, 0.01, 0.03, 0.08],
+        scoring='mean_squared_error',
+        fit_intercept=True,
+        cv=5,
+        normalize=True)
+ridge_regr_cv.name = "Ridge regression - cv"
+
+kernel_ridge_regr = kernel_ridge.KernelRidge(kernel='rbf', alpha=0.1)
+kernel_ridge_regr.name = "Kernel ridge regression"
+
+svm_svr_regr = svm.SVR(cache_size=1500, tol=1e-1)
+svm_svr_regr.name = "svm - SVR"
+
+decision_tree_regr = tree.DecisionTreeRegressor()
+decision_tree_regr.name = "Decision Tree Regressor"
+
+ada_boost_regr = ensemble.AdaBoostRegressor(n_estimators=100)
+ada_boost_regr.name = "Ada Boost regressor"
+
+gradient_boosting_regr = ensemble.GradientBoostingRegressor(
+        loss='quantile', min_samples_leaf=4, n_estimators=100)
+gradient_boosting_regr.name = "Gradient boosting regressor"
+
+random_forest_regressor = ensemble.RandomForestRegressor(n_estimators=50)
+random_forest_regressor.name = "Random Forest Regressor"
 
 lasso = linear_model.Lasso(alpha=0.1, normalize=True)
 lasso.name = "Lasso"
@@ -86,3 +275,47 @@ bayes_regr.name = "Bayesian regression"
 
 average = AverageModel()
 first_week = FirstWeekCopyModel(column_indexes["first_week"])
+
+lasso_lars_regr = linear_model.LassoLars(alpha=0.0005, normalize=True)
+lasso_lars_regr.name = "Lasso lars regr"
+
+only_lars_regr = linear_model.Lars()
+only_lars_regr.name = "Only LARS"
+
+elastic_net_regr = linear_model.ElasticNet(alpha=0.1)
+elastic_net_regr.name = "Elastic Net"
+
+ard_regr = linear_model.ARDRegression()
+ard_regr.name = "ARD regr"
+
+sgd_regr = linear_model.SGDRegressor()
+sgd_regr.name = "SGD regr"
+
+isotonic_regr = isotonic.IsotonicRegression()
+isotonic_regr.name = "Isotonic regression"
+
+bagging_lin_regr = ensemble.BaggingRegressor(linear_model.LinearRegression())
+bagging_lin_regr.name = "Bagging linear regression"
+
+bagging_decision_tree = ensemble.BaggingRegressor(tree.DecisionTreeRegressor())
+bagging_decision_tree.name = "Bagging dec tree regressor"
+
+clustering_lin_regr = ClusteringEnsemble()
+clustering_lin_regr.name = "Clustered Linear Regression"
+
+first_week_ensemble_regr = FirstWeek0Ensemble()
+first_week_ensemble_regr.name = "First Week based ensemble - Linear Regression"
+
+combiner_regr = ModelCombinator(
+        [
+            linear_model.Ridge(alpha=0.05),
+            ensemble.GradientBoostingRegressor(n_estimators=25)
+        ],
+        linear_regr)
+combiner_regr.name = "Combiner"
+
+logistic_separator_regr = LogisticRegressionSeparator()
+logistic_separator_regr.name = "Logistic regression separator - LinRegr"
+
+novelty_separator_regr = NoveltySeparator()
+novelty_separator_regr.name = "Novelty separator regression - LinRegr"

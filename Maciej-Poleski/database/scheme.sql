@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2015-11-24 23:36:52 CET
+-- Started on 2015-12-02 00:07:58 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -15,7 +15,7 @@ SET client_min_messages = warning;
 
 DROP DATABASE "studia";
 --
--- TOC entry 2066 (class 1262 OID 16385)
+-- TOC entry 2078 (class 1262 OID 16385)
 -- Name: studia; Type: DATABASE; Schema: -; Owner: -
 --
 
@@ -40,7 +40,7 @@ CREATE SCHEMA "public";
 
 
 --
--- TOC entry 2067 (class 0 OID 0)
+-- TOC entry 2079 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA "public"; Type: COMMENT; Schema: -; Owner: -
 --
@@ -49,7 +49,7 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 
 --
--- TOC entry 184 (class 3079 OID 11867)
+-- TOC entry 186 (class 3079 OID 11867)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -57,8 +57,8 @@ CREATE EXTENSION IF NOT EXISTS "plpgsql" WITH SCHEMA "pg_catalog";
 
 
 --
--- TOC entry 2068 (class 0 OID 0)
--- Dependencies: 184
+-- TOC entry 2080 (class 0 OID 0)
+-- Dependencies: 186
 -- Name: EXTENSION "plpgsql"; Type: COMMENT; Schema: -; Owner: -
 --
 
@@ -193,7 +193,7 @@ CREATE MATERIALIZED VIEW "users_firstaction" AS
 
 
 --
--- TOC entry 2069 (class 0 OID 0)
+-- TOC entry 2081 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: MATERIALIZED VIEW "users_firstaction"; Type: COMMENT; Schema: public; Owner: -
 --
@@ -222,20 +222,6 @@ CREATE MATERIALIZED VIEW "users_properties" AS
 
 
 --
--- TOC entry 183 (class 1259 OID 16489)
--- Name: users_features; Type: VIEW; Schema: public; Owner: -
---
-
-CREATE VIEW "users_features" AS
- SELECT COALESCE("users_properties"."utmContent", ((-1))::bigint) AS "utmContent",
-    "date_part"('epoch'::"text", ("users_properties"."first_buy" - "users_properties"."first_action")) AS "time_to_buy",
-    "users_properties"."revenue_in_7days",
-    "users_properties"."revenue_in_30days"
-   FROM "users_properties"
-  WHERE ("users_properties"."first_buy" IS NOT NULL);
-
-
---
 -- TOC entry 180 (class 1259 OID 16430)
 -- Name: views; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
@@ -246,6 +232,56 @@ CREATE TABLE "views" (
     "timestamp" timestamp without time zone,
     "pagetype" character varying
 );
+
+
+--
+-- TOC entry 183 (class 1259 OID 16524)
+-- Name: users_views_distribution; Type: MATERIALIZED VIEW; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE MATERIALIZED VIEW "users_views_distribution" AS
+ SELECT "views"."userId",
+    ("count"(NULLIF('Product'::"text", ("views"."pagetype")::"text")))::integer AS "views_product",
+    ("count"(NULLIF('Collection'::"text", ("views"."pagetype")::"text")))::integer AS "views_collection",
+    ("count"(NULLIF('Category'::"text", ("views"."pagetype")::"text")))::integer AS "views_category",
+    "count"(*) AS "views_any"
+   FROM "views"
+  GROUP BY "views"."userId"
+  WITH NO DATA;
+
+
+--
+-- TOC entry 184 (class 1259 OID 16531)
+-- Name: users_features; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW "users_features" AS
+ SELECT "users_properties"."userId",
+    COALESCE("users_properties"."utmContent", ((-1))::bigint) AS "utmContent",
+    "date_part"('epoch'::"text", ("users_properties"."first_buy" - "users_properties"."first_action")) AS "time_to_buy",
+    "users_properties"."revenue_in_7days",
+    "users_properties"."revenue_in_30days",
+    "users_views_distribution"."views_product",
+    "users_views_distribution"."views_collection",
+    "users_views_distribution"."views_category"
+   FROM ("users_properties"
+     JOIN "users_views_distribution" ON (((("users_properties"."userId")::character varying)::"text" = ("users_views_distribution"."userId")::"text")))
+  WHERE ("users_properties"."first_buy" IS NOT NULL);
+
+
+--
+-- TOC entry 185 (class 1259 OID 16536)
+-- Name: users_features_reduced; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW "users_features_reduced" AS
+ SELECT ("users_features"."time_to_buy" / (1000000)::double precision) AS "time_to_buy_normalized",
+    "users_features"."revenue_in_7days",
+    "users_features"."revenue_in_30days",
+    "users_features"."views_product",
+    "users_features"."views_collection",
+    "users_features"."views_category"
+   FROM "users_features";
 
 
 --
@@ -263,7 +299,7 @@ CREATE VIEW "views_users" AS
 
 
 --
--- TOC entry 1941 (class 2606 OID 16441)
+-- TOC entry 1950 (class 2606 OID 16441)
 -- Name: item_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -272,7 +308,7 @@ ALTER TABLE ONLY "items"
 
 
 --
--- TOC entry 1943 (class 2606 OID 16443)
+-- TOC entry 1952 (class 2606 OID 16443)
 -- Name: user_ads_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -281,7 +317,7 @@ ALTER TABLE ONLY "user_ads"
 
 
 --
--- TOC entry 1945 (class 2606 OID 16445)
+-- TOC entry 1954 (class 2606 OID 16445)
 -- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -289,7 +325,15 @@ ALTER TABLE ONLY "users"
     ADD CONSTRAINT "users_pkey" PRIMARY KEY ("userId");
 
 
--- Completed on 2015-11-24 23:36:52 CET
+--
+-- TOC entry 1955 (class 1259 OID 16523)
+-- Name: views_userId_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX "views_userId_index" ON "views" USING "btree" ("userId" COLLATE "C");
+
+
+-- Completed on 2015-12-02 00:07:58 CET
 
 --
 -- PostgreSQL database dump complete

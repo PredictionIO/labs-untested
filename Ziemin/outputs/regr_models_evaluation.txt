@@ -8,3 +8,107 @@ MSE of Average = 4343.2296641994435
 MSE of Linear regression = 1686.3774201226363
 MSE of Lasso = 4343.2296641994435
 MSE of Bayesian regression = 1686.3806508465696
+
+27.11.2015
+Reading data ...
+Testing models ...
+Checking model:  Linear regression
+Checking model:  Gradient boosting regressor
+Checking model:  Random Forest Regressor
+Errors:
+Score of Linear regression = -1486.616 (+/- 2050.269)
+Score of Gradient boosting regressor = -1549.940 (+/- 2147.717)
+Score of Random Forest Regressor = -1732.896 (+/- 2163.485)
+
+
+29.11.2015
+deg 2 features, scaled, chose 3 the most important
+Score of Random Forest Regressor = -1573.189 (+/- 2247.359)
+Score of Elastic Net = -4075.429 (+/- 6907.286)
+Score of Gradient boosting regressor = -1507.928 (+/- 2144.660)
+Score of Bayesian regression = -1844.346 (+/- 2155.394)
+Score of Linear regression = -1844.403 (+/- 2155.511)
+Score of Ridge regression = -1521.860 (+/- 2063.343)
+Score of Only LARS = -85793.516 (+/- 292393.181)
+
+29.11.2015
+Min max scaler
+Score of Ridge regression = -1551.959 (+/- 2283.775)
+Score of First Week Copy = -4082.151 (+/- 6924.712)
+Score of Average = -4076.212 (+/- 6907.496)
+Score of Elastic Net = -4074.978 (+/- 6910.256)
+Score of Linear regression = -1486.616 (+/- 2050.269)
+
+29.11.2015
+No min max scaler
+Score of Linear regression = -1486.616 (+/- 2050.269)
+Score of Average = -4076.212 (+/- 6907.496)
+Score of First Week Copy = -2662.656 (+/- 4480.667)
+Score of Elastic Net = -1485.608 (+/- 2047.278)
+Score of Ridge regression = -1551.959 (+/- 2283.775)
+Score of Bagging linear regression = -1494.598 (+/- 2039.995)
+
+30.11.2015
+clustered Linear Regression - 3 clusters
+Reading data ...
+Testing models ...
+Checking model:  Clustered Linear Regression
+Training KMeans
+Training Estimators
+Predicting clusters
+estimating results
+Training KMeans
+Training Estimators
+Predicting clusters
+estimating results
+Training KMeans
+Training Estimators
+Predicting clusters
+estimating results
+Training KMeans
+Training Estimators
+Predicting clusters
+estimating results
+Training KMeans
+Training Estimators
+Predicting clusters
+estimating results
+Errors:
+Score of Clustered Linear Regression = -1486.892 (+/- 2049.180)
+
+
+Checking model:  First Week based ensemble - Linear Regression
+Training Estimators
+Estimating results
+Training Estimators
+Estimating results
+Training Estimators
+Estimating results
+Training Estimators
+Estimating results
+Training Estimators
+Estimating results
+Errors:
+Score of First Week based ensemble - Linear Regression = -1831.668 (+/- 1125.357)
+
+
+linear regression only for samples with 0 views_count:
+Reading data ...
+Testing models ...
+Checking model:  Linear regression
+Errors:
+Score of Linear regression = -337.837 (+/- 150.828)
+
+linear regression only fro samples with views_count > 0
+Reading data ...
+Testing models ...
+Checking model:  Linear regression
+Errors:
+Score of Linear regression = -1878.286 (+/- 2094.820)
+
+1.12.2015
+Reading data ...
+Testing models ...
+Checking model:  Logistic regression separator - LinRegr
+Errors:
+Score of Logistic regression separator - LinRegr = -1489.294 (+/- 1287.013)
