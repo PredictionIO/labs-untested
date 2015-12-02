@@ -31,3 +31,16 @@ Residual sum of squares: 1351.56
 Variance score: 0.76
  
 
+
+25/11/2015
+
+1. Get some theoretical knowledge about features, features selection.
+2. Generate plots for different features selection models.
+3. Start a data migration to the new faster machine.
+
+02/12/2015
+
+1. Finish a data migration to the new faster machine.
+2. Read about bias, variance, overfitting.
+3. Count a MSE for different training/tests sets (cross validation).
+3. Generate plot with results (avg. 1637.12).
