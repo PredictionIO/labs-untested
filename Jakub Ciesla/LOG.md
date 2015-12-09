@@ -36,11 +36,23 @@ Variance score: 0.76
 
 1. Get some theoretical knowledge about features, features selection.
 2. Generate plots for different features selection models.
-3. Start a data migration to the new faster machine.
+3. Start the data migration to the new faster machine.
 
 02/12/2015
 
-1. Finish a data migration to the new faster machine.
+1. Finish the data migration to the new faster machine.
 2. Read about bias, variance, overfitting.
 3. Count a MSE for different training/tests sets (cross validation).
-3. Generate plot with results (avg. 1637.12).
+4. Generate plot with results (avg. 1637.12).
+
+09/12/2015
+
+1. Get some statistical knowledge about the dataset:
+	- 99% of people buy nothing in the first week!!!,
+	- 0.4% of people buy something in the first month but nothing in the first week,
+	- AVG of the first week is $1.89, AVG of the first month is $2.9.
+2. Tests with KMeans - clustering.
+3. Get some theoretical knowledge about Clustered Linear Regression:
+	- http://yoksis.bilkent.edu.tr/pdf/files/10.1016-S0950-7051(01)00154-X.pdf
+	- http://staff.ii.pw.edu.pl/~gawrysia/publ/iis2001.pdf
+4. Divide the dataset into two sets: first week > 0 and first week = 0. First week > 0 - solution with linear regression, first week = 0 - result always equals 0. (avg. 1638.54).
