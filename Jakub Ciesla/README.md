@@ -22,6 +22,18 @@ ExtraTreesClassifier, 20 estimators
 cls/RandomForest
 RandomForestClassifier, 20 estimators
 
+clustering/KMeans.py
+A test with KMeans clustering.
+
+clustering/KMeans.png
+A plot with result from KMeans.py.
+
+clustering/0_1.py
+A test with dividing dataset into two sets: first_week = 0 and first_week > 0 (avg. 1638.51). 
+
+clustering/0_1.png
+A plot with result from 0_1.py.
+
 sql/query.sql
 Some useful SQL queries which were used to create features for ML.
 

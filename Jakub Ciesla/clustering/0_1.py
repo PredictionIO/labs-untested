@@ -29,14 +29,6 @@ result = np.mean((Y_test - avg) ** 2)
 print "Average: ", result, "\n"
 ####################
 
-# copy first_week colums as result
-
-result = np.mean((Y_test - X_test[:, 0]) ** 2)
-print "Copy first week: ", result, "\n"
-####################
-
-
-#ShuffleSplit with linear regression
 N = len(X)
 iter_number = 20
 ss = cross_validation.ShuffleSplit(N, n_iter=iter_number, test_size=0.2,
@@ -45,20 +37,28 @@ MSE = 0
 results = []
 for train_index, test_index in ss:
 	X_training, Y_training, X_test, Y_test = [], [], [], []
+	X_test_0, Y_test_0_predict, Y_test_0_real = [], [], []
 	for i in train_index:
-		X_training.append(X[i])
-		Y_training.append(Y[i])
+		if X[i, 0] > 0:
+			X_training.append(X[i])
+			Y_training.append(Y[i])
 	for i in test_index:
-		X_test.append(X[i])
-		Y_test.append(Y[i])
+		if X[i, 0] > 0:
+			X_test.append(X[i])
+			Y_test.append(Y[i])
+		else:
+			Y_test_0_predict.append(0)
+			Y_test_0_real.append(Y[i])
+			
 	regr = linear_model.LinearRegression()
 	regr.fit(X_training, Y_training)
-	res = np.mean((regr.predict(X_test) - Y_test) ** 2)
+	Y_predict = np.concatenate((regr.predict(X_test),Y_test_0_predict))
+	Y_test = np.concatenate((Y_test, Y_test_0_real))
+	res = np.mean((Y_predict - Y_test) ** 2)
 	MSE += res
-	results.append(round(res, 2))
+	results.append(res)
 	print ("Residual sum of squares: %.2f"
       		% res)
-      	print ('Variance score: %.2f' % regr.score(X_test, Y_test))
 	print "\n" 
 print ("MSE: %.2f" % 
 	(MSE/iter_number))
@@ -70,5 +70,3 @@ plt.bar(range(0, iter_number), results,
 plt.xticks(range(0, iter_number), results)
 plt.xlim([-1, iter_number])
 plt.show()
-
-

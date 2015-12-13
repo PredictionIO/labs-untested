@@ -22,3 +22,6 @@
 - 3 new features (based on views)
 - Worsen linear regression results (a bit)
 - Improve Decision Trees regression results (noticeably)
+
+02.12.2015
+- Classification (first task) using Decision Trees Classifier with perfect(?) result. (It is so perfect, I have to verify it somehow).
