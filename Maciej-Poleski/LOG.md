@@ -25,3 +25,13 @@
 
 02.12.2015
 - Classification (first task) using Decision Trees Classifier with perfect(?) result. (It is so perfect, I have to verify it somehow).
+
+12.12.2015
+- Verified classification accuracy - not perfect, but stil better than expected (half of positive instances are false negative - not so bad being avare that positive instances are truly rare)
+
+13.12.2015
+- Updated database schema
+- Created tool translating any given discrete feature to bit vector (utm_extract)
+- Translated discrete feature (utmSource) into binary vector (as described by Marco). Disappointing results:
+- Decision Trees regression var: ~~0.61 (dtr2.py comparing to dtr.py)
+- Ridge regression var: ~~0.59 (ridge_reduced2.py comparing to ridge_reduced.py)
