@@ -15,7 +15,7 @@ Y = data[:, 2]
 X = data[:, [1, 3, 4]] #first_week, item, views
 
 N = len(X)
-ratio = 0.9
+ratio = 0.8
 
 X_training = X[0:ratio*N]
 Y_training = Y[0:ratio*N]
@@ -27,6 +27,7 @@ print "Dataset prepared", "\n"
 
 # average as result
 avg = np.mean(Y_training)
+print avg
 result = np.mean((Y_test - avg) ** 2)
 print "Average: ", result, "\n"
 ####################

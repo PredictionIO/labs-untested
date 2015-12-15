@@ -9,3 +9,8 @@
 - tried a different approach to the problem - use a logistic regression to identify a group of users that will buy any item between the end of week and the end of month first, then apply a linear regression only for the selected group (a prediction is terribly inaccurate because of many false positives in the initial phase)
 - familiarized myself with the features selection techniques
 - trying to make some statistical observations about the data
+
+# 2 XII 2015
+- made a research on the imbalanced datasets
+- familiarized myself with the different classification algorithms
+- tried a complement naive Bayes classifier (results are slightly better, but not satisfactory)

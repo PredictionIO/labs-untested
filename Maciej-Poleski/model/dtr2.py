@@ -3,11 +3,15 @@
 import numpy;
 from sklearn import tree
 
-data = numpy.loadtxt('input_data_reduced_shuffled.csv',delimiter=',')
+# size of utmSources = 108
+data = numpy.loadtxt('input_data_reduced2_shuffled_unpacked.csv',delimiter=',')
 size = len(data)
 testSize = size*80/100
 
-data_X = data[:, [0, 1, 3, 4, 5]]
+selection = [i for i in range(109)]
+selection.remove(2)
+
+data_X = data[:, selection]
 data_X_train = data_X[:-testSize]
 data_X_test = data_X[-testSize:]
 
