@@ -56,3 +56,25 @@
   * 3 - 4148705
   * 4 - 4459405
   * 5 - 4664367
+
+## 15.12.2015
+- worked on improving binary classification - whether user is going to buy anything 
+ during the rest of the month after the first week
+- the measure I used was recall
+- checked many classification models: the best were those based on logistic regression with balanced class weights
+(SGDClassifier with loss=log and penalty=elasticnet)
+- Recall was on average about 0.55 +/- 0.01
+- then I spent a lot of time on add new features, namely categorical ones
+  * items based features: how many times user bought an item from some personality or style
+  * ads based features: did user see an ad from this or this source and medium
+- I generated large files with one hot encoded categories (about 6 GB big each)
+- Then I used PCA to reduce dimensionality (from about 160 on average to 10)
+- In the end I got features vector of width 39
+- Recall was sadly not improved, standard deviation dropped a bit
+- Regression methods did not improve either
+- I could look for more features - e.g. similar to those items based but based on views, although
+I would not expect it to improve my results much
+- I suspect that there is a large group of users with almost no activity within first week kept being classified
+incorrectly
+- I have to look closer at the data and maybe try to see some patterns which I am missing now
+- Improving this basic classification problem will let me build better model in the end

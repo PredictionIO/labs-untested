@@ -30,6 +30,22 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: categorical; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
+--
+
+CREATE TABLE categorical (
+    user_id integer,
+    utm_source bigint,
+    utm_campaign bigint,
+    utm_medium bigint,
+    utm_term bigint,
+    utm_content bigint
+);
+
+
+ALTER TABLE categorical OWNER TO ziemin;
+
+--
 -- Name: conversions; Type: TABLE; Schema: public; Owner: ziemin; Tablespace: 
 --
 
@@ -61,7 +77,11 @@ CREATE TABLE features (
     viewed_bought_count integer DEFAULT 0,
     has_seen_ad integer DEFAULT 0,
     country character varying(40),
-    regist_day_of_year integer
+    regist_day_of_year integer,
+    utm_source bigint,
+    utm_campaign bigint,
+    utm_medium bigint,
+    utm_content bigint
 );
 
 
