@@ -12,8 +12,8 @@ from sklearn.decomposition import PCA
 import sys
 
 ms = [
-       # models.linear_regr,
-       # models.ridge_regr,
+       models.linear_regr,
+       models.ridge_regr,
        # models.ridge_regr_cv,
        # models.kernel_ridge_regr,
        # models.svm_svr_regr,
@@ -29,7 +29,7 @@ ms = [
        # models.only_lars_regr,
        # models.combiner_regr,
        # models.ard_regr,
-       # models.elastic_net_regr,
+       models.elastic_net_regr,
        # models.sgd_regr,
        # models.isotonic_regr,
        # models.bagging_lin_regr,
@@ -37,7 +37,7 @@ ms = [
        # models.clustering_lin_regr,
        # models.first_week_ensemble_regr,
        # models.logistic_separator_regr,
-       models.novelty_separator_regr,
+       # models.novelty_separator_regr,
        ]
 
 def get_cv_iterators(n):

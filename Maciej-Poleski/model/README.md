@@ -14,6 +14,12 @@ After extending model by 3 new features (number of views by type)
 *_reduced.py - Worsen results (var = 0.6)
 dtr.py - Improved results (var ~~ 0.63), still bad
 dtc.py - Perfect fit (var = 1.00), almost unbelievable (almost, because the 'OK' set is very small)
+ridge_reduced2.py
+dtr2.py
+lasso_reduced2.py
+elasticnet_reduced2.py
+
+utm_extractor.cpp - tool used to translate discrete features (like utm tags or items properties) into bit vector.
 
 Corollary:
 ML models like Continuous functions and very dislike discrete ones.
