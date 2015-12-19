@@ -56,3 +56,10 @@ Variance score: 0.76
 	- http://yoksis.bilkent.edu.tr/pdf/files/10.1016-S0950-7051(01)00154-X.pdf
 	- http://staff.ii.pw.edu.pl/~gawrysia/publ/iis2001.pdf
 4. Divide the dataset into two sets: first week > 0 and first week = 0. First week > 0 - solution with linear regression, first week = 0 - result always equals 0. (avg. 1638.54).
+
+16/12/2015
+
+1. Work on set of people who haven't equal first week and first month purchases (26988 people, 23751 people with first week = 0).
+2. Use only 3 simple features (first_week, items, views) - avg. MSE is 244138.12!!!
+3. Prepare new features to decrease MSE (new result: 243360.32 - really disappointing).
+4. Generate a plot with features importances.
