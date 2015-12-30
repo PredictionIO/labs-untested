@@ -63,3 +63,8 @@ Variance score: 0.76
 2. Use only 3 simple features (first_week, items, views) - avg. MSE is 244138.12!!!
 3. Prepare new features to decrease MSE (new result: 243360.32 - really disappointing).
 4. Generate a plot with features importances.
+
+30/12/2015
+1. Get some theoretical knowledge about Area Under the Curve (AUC) and Receiver Operating Characteristic (ROC).
+2. Work on prediction if first_week is equal to first_month.
+3. Generate a plot with result for people with first_week > 0. (ROC AUC score = 63)
