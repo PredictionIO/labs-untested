@@ -18,8 +18,16 @@ ridge_reduced2.py
 dtr2.py
 lasso_reduced2.py
 elasticnet_reduced2.py
+dtr3.py
+elasticnet_reduced3.py
+^^ - work on appropriate input data
 
 utm_extractor.cpp - tool used to translate discrete features (like utm tags or items properties) into bit vector.
+
+input_data_reduced?.csv is dumped from users_features_reduced
+then it is shuffled into input_data_reduced?_shuffled.csv
+then it is unpacked using extractor (currently on 6 column) into input_data_reduced?_shuffled_unpacked.csv
+the last file is used by appropriate scripts
 
 Corollary:
 ML models like Continuous functions and very dislike discrete ones.
