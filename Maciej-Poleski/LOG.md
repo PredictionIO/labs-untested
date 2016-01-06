@@ -38,3 +38,9 @@
 
 14.12.2015
 - Tried Lasso and ElasticNet. Both give variance 0.59 regardles of used normalization parameters (although some normalization parameters really DO nice normalization of feature set). Maybe feature set is depleted. On the other hand full fledged solutions like Decision Trees offer better results anyway.
+
+30.12.2015
+- Updated database schema
+- New features based on daily revenue in ach day since register (not enough disk space to make computations required to generate similar features based on views)
+- Tried Decision Trees regression and Elastic Net. DTR remains the same (0.62), Elastic Net improves slightly (0.60).
+

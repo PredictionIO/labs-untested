@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2015-12-13 23:00:08 CET
+-- Started on 2015-12-30 20:31:45 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -15,7 +15,7 @@ SET client_min_messages = warning;
 
 DROP DATABASE "studia";
 --
--- TOC entry 2083 (class 1262 OID 16385)
+-- TOC entry 2088 (class 1262 OID 16385)
 -- Name: studia; Type: DATABASE; Schema: -; Owner: -
 --
 
@@ -40,7 +40,7 @@ CREATE SCHEMA "public";
 
 
 --
--- TOC entry 2084 (class 0 OID 0)
+-- TOC entry 2089 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA "public"; Type: COMMENT; Schema: -; Owner: -
 --
@@ -49,7 +49,7 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 
 --
--- TOC entry 187 (class 3079 OID 11867)
+-- TOC entry 188 (class 3079 OID 11867)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -57,8 +57,8 @@ CREATE EXTENSION IF NOT EXISTS "plpgsql" WITH SCHEMA "pg_catalog";
 
 
 --
--- TOC entry 2085 (class 0 OID 0)
--- Dependencies: 187
+-- TOC entry 2090 (class 0 OID 0)
+-- Dependencies: 188
 -- Name: EXTENSION "plpgsql"; Type: COMMENT; Schema: -; Owner: -
 --
 
@@ -102,6 +102,70 @@ CREATE TABLE "items" (
 
 
 --
+-- TOC entry 175 (class 1259 OID 16401)
+-- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE "users" (
+    "userId" bigint NOT NULL,
+    "registerCountry" character varying,
+    "signupTime" timestamp without time zone
+);
+
+
+--
+-- TOC entry 187 (class 1259 OID 16568)
+-- Name: time_ranges; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW "time_ranges" AS
+ SELECT "users"."userId",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '30 days'::interval)) AND ("conversions"."timestamp" >= "users"."signupTime")) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_30days",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '1 day'::interval)) AND ("conversions"."timestamp" >= "users"."signupTime")) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_1day",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '2 days'::interval)) AND ("conversions"."timestamp" > ("users"."signupTime" + '1 day'::interval))) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_2day",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '3 days'::interval)) AND ("conversions"."timestamp" > ("users"."signupTime" + '2 days'::interval))) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_3day",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '4 days'::interval)) AND ("conversions"."timestamp" > ("users"."signupTime" + '3 days'::interval))) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_4day",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '5 days'::interval)) AND ("conversions"."timestamp" > ("users"."signupTime" + '4 days'::interval))) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_5day",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '6 days'::interval)) AND ("conversions"."timestamp" > ("users"."signupTime" + '5 days'::interval))) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_6day",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '7 days'::interval)) AND ("conversions"."timestamp" > ("users"."signupTime" + '6 days'::interval))) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_7day"
+   FROM ("users"
+     LEFT JOIN "conversions" ON (("users"."userId" = "conversions"."userId")))
+  GROUP BY "users"."userId";
+
+
+--
 -- TOC entry 174 (class 1259 OID 16398)
 -- Name: user_ads; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
@@ -113,18 +177,6 @@ CREATE TABLE "user_ads" (
     "utmMedium" bigint,
     "utmTerm" bigint,
     "utmContent" bigint
-);
-
-
---
--- TOC entry 175 (class 1259 OID 16401)
--- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE "users" (
-    "userId" bigint NOT NULL,
-    "registerCountry" character varying,
-    "signupTime" timestamp without time zone
 );
 
 
@@ -193,7 +245,7 @@ CREATE MATERIALIZED VIEW "users_firstaction" AS
 
 
 --
--- TOC entry 2086 (class 0 OID 0)
+-- TOC entry 2091 (class 0 OID 0)
 -- Dependencies: 179
 -- Name: MATERIALIZED VIEW "users_firstaction"; Type: COMMENT; Schema: public; Owner: -
 --
@@ -283,8 +335,16 @@ CREATE VIEW "users_features_reduced" AS
     "users_features"."views_product",
     "users_features"."views_collection",
     "users_features"."views_category",
-    "users_features"."utmSource"
-   FROM "users_features";
+    "users_features"."utmSource",
+    "time_ranges"."revenue_in_1day",
+    "time_ranges"."revenue_in_2day",
+    "time_ranges"."revenue_in_3day",
+    "time_ranges"."revenue_in_4day",
+    "time_ranges"."revenue_in_5day",
+    "time_ranges"."revenue_in_6day",
+    "time_ranges"."revenue_in_7day"
+   FROM ("users_features"
+     LEFT JOIN "time_ranges" ON (("time_ranges"."userId" = "users_features"."userId")));
 
 
 --
@@ -312,7 +372,7 @@ CREATE VIEW "views_users" AS
 
 
 --
--- TOC entry 1954 (class 2606 OID 16441)
+-- TOC entry 1958 (class 2606 OID 16441)
 -- Name: item_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -321,7 +381,7 @@ ALTER TABLE ONLY "items"
 
 
 --
--- TOC entry 1956 (class 2606 OID 16443)
+-- TOC entry 1960 (class 2606 OID 16443)
 -- Name: user_ads_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -330,7 +390,7 @@ ALTER TABLE ONLY "user_ads"
 
 
 --
--- TOC entry 1958 (class 2606 OID 16445)
+-- TOC entry 1962 (class 2606 OID 16445)
 -- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -339,14 +399,14 @@ ALTER TABLE ONLY "users"
 
 
 --
--- TOC entry 1959 (class 1259 OID 16523)
+-- TOC entry 1963 (class 1259 OID 16523)
 -- Name: views_userId_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX "views_userId_index" ON "views" USING "btree" ("userId" COLLATE "C");
 
 
--- Completed on 2015-12-13 23:00:08 CET
+-- Completed on 2015-12-30 20:31:45 CET
 
 --
 -- PostgreSQL database dump complete
