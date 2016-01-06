@@ -41,6 +41,11 @@
 
 30.12.2015
 - Updated database schema
-- New features based on daily revenue in ach day since register (not enough disk space to make computations required to generate similar features based on views)
+- New features based on daily revenue in each day since register (not enough disk space to make computations required to generate similar features based on views)
 - Tried Decision Trees regression and Elastic Net. DTR remains the same (0.62), Elastic Net improves slightly (0.60).
+
+06.01.2016
+- Updated database schema
+- views per day (as above)
+- No improvement...
 
