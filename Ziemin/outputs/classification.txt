@@ -1,0 +1,68 @@
+-----------------------------------------
+AUC metrics
+
+Testing classifiers
+---- Scores of Simple Logistic regression ----
+Auc: 0.77 (+/-) 0.002
+Min: 0.77 Max 0.775
+
+---- Scores of SGDClassifier1 ----
+Auc: 0.73 (+/-) 0.008
+Min: 0.73 Max 0.750
+
+---- Scores of SGDClassifier2 ----
+Auc: 0.77 (+/-) 0.002
+Min: 0.77 Max 0.771
+Size of true on the whole set: 755219
+
+-----------------------------------------
+Recall metrics
+
+Reading data ...
+Testing classifiers
+---- Scores of Simple Logistic regression ----
+Recall: 0.55 (+/-) 0.006
+Min: 0.54 Max 0.554
+Size of true on the whole set: 805856
+
+---- Scores of SGDClassifier1 ----
+Recall: 0.59 (+/-) 0.072
+Min: 0.53 Max 0.731
+Size of true on the whole set: 1197545
+
+---- Scores of SGDClassifier2 ----
+Recall: 0.54 (+/-) 0.005
+Min: 0.53 Max 0.546
+Size of true on the whole set: 755374
+
+Reading data ...
+Testing classifiers
+---- Scores of XGBoost classifier ----
+Auc: 0.66 (+/-) 0.005
+Min: 0.65 Max 0.667
+Size of true on the whole set: 0
+
+---- Scores of XGBoost classifier ----
+Auc: 0.50 (+/-) 0.001
+Min: 0.50 Max 0.502
+Size of true on the whole set: 13
+
+---- Scores of XGBoost classifier ----
+Auc: 0.74 (+/-) 0.004
+Min: 0.74 Max 0.753
+Size of true on the whole set: 0
+
+---- Scores of XGBoost classifier ----
+Recall: 0.00 (+/-) 0.000
+Min: 0.00 Max 0.000
+Size of true on the whole set: 0
+
+---- Scores of XGBoost classifier ----
+Recall: 0.00 (+/-) 0.000
+Min: 0.00 Max 0.000
+Size of true on the whole set: 13
+
+---- Scores of XGBoost classifier ----
+Recall: 0.00 (+/-) 0.000
+Min: 0.00 Max 0.000
+Size of true on the whole set: 0

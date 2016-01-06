@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 from data import curr_index
-from sklearn.cross_validation import cross_val_score
+from sklearn.cross_validation import cross_val_score, StratifiedKFold
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression, SGDClassifier, PassiveAggressiveClassifier, \
         RidgeClassifier
@@ -11,8 +11,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.utils import shuffle
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import RandomForestRegressor, AdaBoostClassifier, \
-        GradientBoostingClassifier, ExtraTreesClassifier
+        GradientBoostingClassifier, ExtraTreesClassifier, BaggingClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
+import xgboost as xgb
 
 # classification for the problem:
 # choose users who will probably buy something more in the next three weeks
@@ -85,15 +86,31 @@ def prepare_bayes(cls):
 
 classifiers = [
         # ("Two LogisticRegressions", InterestingUsersClassifier()),
-        ("Simple Logistic regression", add_scaler(LogisticRegression(class_weight='balanced'))),
+        # ("Simple Logistic regression", add_scaler(LogisticRegression(class_weight='balanced'))),
         # ("RandomForestRegressor", RandomForestRegressor()),
         # ("AdaBoostClassifier", add_scaler(AdaBoostClassifier())),
         # ("GradientBoostingClassifier", add_scaler(GradientBoostingClassifier())),
         # ("ExtraTreesClassifier", ExtraTreesClassifier(class_weight='balanced')),
         # ("GaussianNB", prepare_bayes(GaussianNB())),
         # ("MultinomialNB", prepare_bayes(MultinomialNB(class_prior=[0.3, 0.7]))),
-        ("SGDClassifier1", add_scaler(SGDClassifier(loss='log', penalty='elasticnet', l1_ratio=0.2, class_weight='balanced'))),
-        ("SGDClassifier2", add_scaler(SGDClassifier(loss='log', alpha=0.01, penalty='elasticnet', l1_ratio=0.2, class_weight='balanced'))),
+        # ("SGDClassifier1", add_scaler(SGDClassifier(loss='log', penalty='elasticnet', l1_ratio=0.2, class_weight='balanced'))),
+        # ("SGDClassifier2", add_scaler(SGDClassifier(loss='log', alpha=0.01, penalty='elasticnet', l1_ratio=0.2, class_weight='balanced'))),
+        # ("Baggin Logistic Classifier", add_scaler(BaggingClassifier(base_estimator=LogisticRegression(class_weight='balanced')))),
+        # ("Baggin Logistic SGDC", add_scaler(BaggingClassifier(base_estimator=SGDClassifier(loss='log', penalty='elasticnet', l1_ratio=0.2, class_weight='balanced')))),
+        ('XGBoost classifier', add_scaler(xgb.XGBClassifier(
+                                    objective='binary:logistic',
+                                    n_estimators=4,
+                                    scale_pos_weight=0.1,
+                                    ))),
+        ('XGBoost classifier', add_scaler(xgb.XGBClassifier(
+                                    objective='binary:logistic',
+                                    n_estimators=4,
+                                    max_delta_step=1,
+                                    ))),
+        ('XGBoost classifier', add_scaler(xgb.XGBClassifier(
+                                    objective='binary:logistic',
+                                    n_estimators=5,
+                                    ))),
         ]
 
 
@@ -115,6 +132,15 @@ if __name__ == "__main__":
     x_array, y = shuffle(x_array, y)
 
     print("Testing classifiers")
+
+    for name, cls in classifiers:
+        scores = cross_val_score(cls, x_array, y, scoring='roc_auc', cv=5)
+        print("---- Scores of %s ----" % name)
+        print("Auc: {0:.2f} (+/-) {1:.3f}".format(scores.mean(), scores.std()))
+        print("Min: {0:.2f} Max {1:.3f}".format(scores.min(), scores.max()))
+        classes = cls.fit(x_array, y).predict(x_array)
+        print("Size of true on the whole set: %d" % (np.where(classes == 1)[0].shape[0]))
+        print()
 
     for name, cls in classifiers:
         scores = cross_val_score(cls, x_array, y, scoring='recall', cv=5)

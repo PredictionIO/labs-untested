@@ -78,3 +78,8 @@ I would not expect it to improve my results much
 incorrectly
 - I have to look closer at the data and maybe try to see some patterns which I am missing now
 - Improving this basic classification problem will let me build better model in the end
+
+## 3.01.2016
+- tried different scoring function to recall - roc_curve
+- results were pretty much similar for both logistic regression and SGDClassifier all arount 0.77
+- installed XGBoost library and used XGBClassifier, recall was equal to 0 for all different parameters but auc was changing (why?). Maybe there is something different in this library comparing to standard sklearn models.
