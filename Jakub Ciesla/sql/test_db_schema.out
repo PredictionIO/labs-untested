@@ -25,6 +25,19 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 SET search_path = public, pg_catalog;
 
+--
+-- Name: h_int(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION h_int(text) RETURNS integer
+    LANGUAGE sql
+    AS $_$
+ select ('x'||substr(md5($1),1,8))::bit(32)::int;
+$_$;
+
+
+ALTER FUNCTION public.h_int(text) OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -58,6 +71,45 @@ CREATE TABLE features (
 
 
 ALTER TABLE public.features OWNER TO postgres;
+
+--
+-- Name: features_not_equal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE features_not_equal (
+    user_id integer,
+    first_week integer,
+    first_month integer,
+    items integer,
+    views integer,
+    country integer,
+    user_ads integer,
+    collection_views integer,
+    product_views integer
+);
+
+
+ALTER TABLE public.features_not_equal OWNER TO postgres;
+
+--
+-- Name: features_roc; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE features_roc (
+    user_id integer,
+    first_week integer,
+    first_month integer,
+    equal bit(1),
+    items integer,
+    views integer,
+    collection_views integer,
+    product_views integer,
+    country integer,
+    user_ads integer
+);
+
+
+ALTER TABLE public.features_roc OWNER TO postgres;
 
 --
 -- Name: items; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 

@@ -63,3 +63,12 @@ A script which I used to compute AUC from prediciton scores.
 
 ROC/AUC_first_week>0.png
 A plot with result from test.py on the set of people who have first_week > 0.
+
+pyspark/binary_classification_simple.py
+Test of prediction if first_week is equal first_month or not (using linear regression with SGD). The same test and training data.
+
+pyspark/SVMWithSGD.py
+Test of prediction if first_week is equal first_month or not(using SVM with SGD). Test data - 20%, training data - 80%.
+
+logisticRegressionWithSGD.py
+Test of prediction if first_week is equal first_month or not(using linear regression with SGD). Test data - 20%, training data - 80%.

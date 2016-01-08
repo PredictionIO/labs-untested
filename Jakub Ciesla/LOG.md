@@ -67,4 +67,17 @@ Variance score: 0.76
 30/12/2015
 1. Get some theoretical knowledge about Area Under the Curve (AUC) and Receiver Operating Characteristic (ROC).
 2. Work on prediction if first_week is equal to first_month.
-3. Generate a plot with result for people with first_week > 0. (ROC AUC score = 63)
+3. Generate a plot with result for people with first_week > 0. (ROC AUC score = 0.63)
+
+06/01/2016
+1. PySpark installation.
+2. Learn about PySpark.
+3. Use PySpark and MLLib to predict if first_week is equal first_month or not.
+4. Current results:
+
+binary_classification_simple.py: Training Error = 0.031559 (the same test and training data) - LogisticRegressionWithSGD
+
+SVMWithSGD.py: AVG Test Error = 0.031689 (test data - 20%, training data - 80%)
+
+logisticRegressionWithSGD.py: AVG Test Error = 0.031689 (test data - 20%, training data - 80%)
+
