@@ -83,3 +83,7 @@ incorrectly
 - tried different scoring function to recall - roc_curve
 - results were pretty much similar for both logistic regression and SGDClassifier all arount 0.77
 - installed XGBoost library and used XGBClassifier, recall was equal to 0 for all different parameters but auc was changing (why?). Maybe there is something different in this library comparing to standard sklearn models.
+
+## 8.01.2016
+- played a bit with xgboost and got the best results so far
+- AUC about 0.80 and Recall 0.68

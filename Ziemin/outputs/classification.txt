@@ -66,3 +66,13 @@ Size of true on the whole set: 13
 Recall: 0.00 (+/-) 0.000
 Min: 0.00 Max 0.000
 Size of true on the whole set: 0
+
+
+---- Scores of XGBoost classifier ----
+Auc: 0.80 (+/-) 0.001
+Min: 0.97 Max 0.797
+---- Scores of XGBoost classifier ----
+Recall: 0.68 (+/-) 0.006
+Min: 0.67 Max 0.686
+
+
