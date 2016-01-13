@@ -81,3 +81,15 @@ SVMWithSGD.py: AVG Test Error = 0.031689 (test data - 20%, training data - 80%)
 
 logisticRegressionWithSGD.py: AVG Test Error = 0.031689 (test data - 20%, training data - 80%)
 
+13/01/2016
+1. Only 0.48% of people have not equal first_week and first_month.
+2. Prepare Spart to work on the full set of data (it's need some configuration changes).
+3. Tests with different classification models (different settings) and sets of features.
+4. Current results summary:
+
+SVMWithSGD, test error = 3.2%
+logisticRegressionWithSGD, test error = 2.7%
+logisticRegressionWithSBGS, test error = 4.0%
+decisionTree, test error = 0.3515%
+randomForest, test error = 0.3510%
+gradientBoostedTrees, test error = 0.3510%
