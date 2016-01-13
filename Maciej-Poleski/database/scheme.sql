@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.4.5
 -- Dumped by pg_dump version 9.4.5
--- Started on 2016-01-06 21:01:20 CET
+-- Started on 2016-01-13 20:33:47 CET
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -15,7 +15,7 @@ SET client_min_messages = warning;
 
 DROP DATABASE "studia";
 --
--- TOC entry 2085 (class 1262 OID 16385)
+-- TOC entry 2095 (class 1262 OID 16385)
 -- Name: studia; Type: DATABASE; Schema: -; Owner: -
 --
 
@@ -40,7 +40,7 @@ CREATE SCHEMA "public";
 
 
 --
--- TOC entry 2086 (class 0 OID 0)
+-- TOC entry 2096 (class 0 OID 0)
 -- Dependencies: 5
 -- Name: SCHEMA "public"; Type: COMMENT; Schema: -; Owner: -
 --
@@ -49,7 +49,7 @@ COMMENT ON SCHEMA "public" IS 'standard public schema';
 
 
 --
--- TOC entry 188 (class 3079 OID 11867)
+-- TOC entry 190 (class 3079 OID 11867)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -57,8 +57,8 @@ CREATE EXTENSION IF NOT EXISTS "plpgsql" WITH SCHEMA "pg_catalog";
 
 
 --
--- TOC entry 2087 (class 0 OID 0)
--- Dependencies: 188
+-- TOC entry 2097 (class 0 OID 0)
+-- Dependencies: 190
 -- Name: EXTENSION "plpgsql"; Type: COMMENT; Schema: -; Owner: -
 --
 
@@ -280,6 +280,37 @@ CREATE VIEW "users_5000_month" AS
 
 
 --
+-- TOC entry 187 (class 1259 OID 16638)
+-- Name: users_revenue_6months; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW "users_revenue_6months" AS
+ SELECT "users"."userId",
+    "sum"(
+        CASE
+            WHEN (("conversions"."timestamp" <= ("users"."signupTime" + '6 mons'::interval)) AND ("conversions"."timestamp" >= "users"."signupTime")) THEN ("conversions"."price" * ("conversions"."quantity")::numeric)
+            ELSE (0)::numeric
+        END) AS "revenue_in_6months"
+   FROM ("users"
+     LEFT JOIN "conversions" ON (("users"."userId" = "conversions"."userId")))
+  GROUP BY "users"."userId";
+
+
+--
+-- TOC entry 188 (class 1259 OID 16642)
+-- Name: users_filtered; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW "users_filtered" AS
+ SELECT "users"."userId",
+    "users"."registerCountry",
+    "users"."signupTime"
+   FROM ("users"
+     JOIN "users_revenue_6months" ON (("users"."userId" = "users_revenue_6months"."userId")))
+  WHERE (("users_revenue_6months"."revenue_in_6months" > (500)::numeric) AND ("users"."signupTime" < '2015-03-16'::"date"));
+
+
+--
 -- TOC entry 177 (class 1259 OID 16422)
 -- Name: users_firstbuy; Type: MATERIALIZED VIEW; Schema: public; Owner: -; Tablespace: 
 --
@@ -306,7 +337,7 @@ CREATE VIEW "users_firstaction" AS
 
 
 --
--- TOC entry 2088 (class 0 OID 0)
+-- TOC entry 2098 (class 0 OID 0)
 -- Dependencies: 182
 -- Name: VIEW "users_firstaction"; Type: COMMENT; Schema: public; Owner: -
 --
@@ -364,13 +395,14 @@ CREATE VIEW "users_features" AS
     "users_views_distribution"."views_product",
     "users_views_distribution"."views_collection",
     "users_views_distribution"."views_category"
-   FROM ("users_properties"
+   FROM (("users_properties"
      JOIN "users_views_distribution" ON (((("users_properties"."userId")::character varying)::"text" = ("users_views_distribution"."userId")::"text")))
+     JOIN "users_filtered" ON (("users_properties"."userId" = "users_filtered"."userId")))
   WHERE ("users_properties"."first_buy" IS NOT NULL);
 
 
 --
--- TOC entry 187 (class 1259 OID 16625)
+-- TOC entry 189 (class 1259 OID 16647)
 -- Name: users_features_reduced; Type: VIEW; Schema: public; Owner: -
 --
 
@@ -411,7 +443,7 @@ CREATE VIEW "utm_sources" AS
 
 
 --
--- TOC entry 1955 (class 2606 OID 16441)
+-- TOC entry 1963 (class 2606 OID 16441)
 -- Name: item_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -420,7 +452,7 @@ ALTER TABLE ONLY "items"
 
 
 --
--- TOC entry 1957 (class 2606 OID 16443)
+-- TOC entry 1965 (class 2606 OID 16443)
 -- Name: user_ads_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -429,7 +461,7 @@ ALTER TABLE ONLY "user_ads"
 
 
 --
--- TOC entry 1959 (class 2606 OID 16445)
+-- TOC entry 1967 (class 2606 OID 16445)
 -- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -438,14 +470,14 @@ ALTER TABLE ONLY "users"
 
 
 --
--- TOC entry 1960 (class 1259 OID 16523)
+-- TOC entry 1968 (class 1259 OID 16523)
 -- Name: views_userId_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX "views_userId_index" ON "views" USING "btree" ("userId" COLLATE "C");
 
 
--- Completed on 2016-01-06 21:01:21 CET
+-- Completed on 2016-01-13 20:33:47 CET
 
 --
 -- PostgreSQL database dump complete

@@ -49,3 +49,8 @@
 - views per day (as above)
 - No improvement...
 
+13.01.2016
+- Updated database schema
+- Heavy data normalization. Forget users from last 6 months (so as to have 6 months sampling freedom since registration with complete data about conversions and views). Forget users which spent less than 500 in first 6 months since registration.
+- Unable to finish this computation... (too long)
+
