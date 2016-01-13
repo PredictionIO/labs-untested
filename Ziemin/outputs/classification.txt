@@ -1,3 +1,4 @@
+---- problem - will they spend anything in a month after first week ----
 -----------------------------------------
 AUC metrics
 
@@ -75,4 +76,35 @@ Min: 0.97 Max 0.797
 Recall: 0.68 (+/-) 0.006
 Min: 0.67 Max 0.686
 
+--------------------------------------------
+---- problem - over 5000 in first month ----
+--------------------------------------------
+
+---- Scores of XGBoost classifier (sklearn wrapper)----
+Reading data ...
+Ratio false/true =  71773.29113924051
+Testing classifiers
+---- Scores of XGBoost classifier ----
+Auc: 0.95 (+/-) 0.028
+Min: 0.92 Max 0.997
+
+---- Scores of XGBoost classifier ----
+Recall: 0.73 (+/-) 0.191
+Min: 0.44 Max 0.938
+
+-- score for model trained and tested on the whole set --
+-- XGBoostClassifier
+Number of qualified as true:  976
+Number of real true:  79
+Roc auc score:  0.949287283878
+Recall score:  0.898734177215
+
+
+---- Scores of XGBoost classifier (python api)----
+-- 5 folds in stratified KFold
+
+Recall: 0.68 (+/-) 0.092
+Min: 0.56 Max 0.812
+Auc: 0.84 (+/-) 0.046
+Min: 0.78 Max 0.906
 

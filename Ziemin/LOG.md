@@ -87,3 +87,18 @@ incorrectly
 ## 8.01.2016
 - played a bit with xgboost and got the best results so far
 - AUC about 0.80 and Recall 0.68
+
+## 13.01.2016
+- moved to problem of classifying users spending more than 5000 dollars during the first month of the registratio
+- extensively tested XGBoost classifier and played with parameters for it
+- got very promising results, but strangely different for sklearn and normal api of XGBoost
+    * sklearn 
+        - Auc: 0.95 (+/-) 0.028
+        - Recall: 0.73 (+/-) 0.191
+    * regular python api
+        - Auc: 0.84 (+/-) 0.046
+        - Recall: 0.68 (+/-) 0.092
+- I am going to spend more time tunning parameters (Grid search)
+- I have to find out why there are performance differences between these two apis
+- Then I am planning to work on features to improve performance
+- After that I'll look how it will work with other models in ensemble (I am going to check vowpal wabbit)

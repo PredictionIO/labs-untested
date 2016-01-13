@@ -14,7 +14,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import RandomForestRegressor, AdaBoostClassifier, \
         GradientBoostingClassifier, ExtraTreesClassifier, BaggingClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, recall_score
 import xgboost as xgb
 
 # classification for the problem:
@@ -100,10 +100,20 @@ classifiers = [
         # ("Baggin Logistic Classifier", add_scaler(BaggingClassifier(base_estimator=LogisticRegression(class_weight='balanced')))),
         # ("Baggin Logistic SGDC", add_scaler(BaggingClassifier(base_estimator=SGDClassifier(loss='log', penalty='elasticnet', l1_ratio=0.2, class_weight='balanced')))),
         # ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=120, scale_pos_weight=0.1, max_delta_step=1, reg_alpha=0.0020, gamma=0.002))),
-        ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=220, scale_pos_weight=209, max_delta_step=1, reg_alpha=0.03, gamma=0.003))),
+        ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=50, scale_pos_weight=71773, max_delta_step=1, reg_alpha=0.03, gamma=0.003))),
         # ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=4, max_delta_step=1,))),
         # ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=5,))),
         ]
+
+def get_y_three_weeks(x_array, y_array):
+    # classify if user is going to spent more money in next three weeks
+    y_array -= x_array[:, 0]
+    y = np.where(y_array > 0.1, 1, 0)
+    return y
+
+def get_y_more_than_5000(x_array, y_array):
+    y = np.where(y_array >= 5000, 1, 0)
+    return y
 
 
 # Usage: ./classification.py <x_array.npy> <y_array.npy>
@@ -117,14 +127,13 @@ if __name__ == "__main__":
     x_array = np.load(x_file)
     y_array = np.load(y_file)
 
-    # classify if user is going to spent more money in next three weeks
-    y_array -= x_array[:, 0]
-    y = np.where(y_array > 0.1, 1, 0)
+    # y = get_arrays_three_weeks(x_array, y_array)
+    y = get_y_more_than_5000(x_array, y_array)
 
     x_array, y = shuffle(x_array, y)
     x_array = scale(x_array)
     ratio = float(np.sum(y==0) / np.sum(y==1))
-    print(ratio)
+    print("Ratio false/true = ", ratio)
 
     print("Testing classifiers")
     # set number of threads for XGBoost
@@ -135,9 +144,9 @@ if __name__ == "__main__":
         print("---- Scores of %s ----" % name)
         print("Auc: {0:.2f} (+/-) {1:.3f}".format(scores.mean(), scores.std()))
         print("Min: {0:.2f} Max {1:.3f}".format(scores.min(), scores.max()))
-        cls.fit(x_array, y, eval_metric='auc')
-        classes = cls.predict(x_array)
-        print("Size of true on the whole set: %d" % (np.where(classes == 1)[0].shape[0]))
+        # cls.fit(x_array, y, eval_metric='auc')
+        # classes = cls.predict(x_array)
+        # print("Size of true on the whole set: %d" % (np.where(classes == 1)[0].shape[0]))
         print()
 
     for name, cls in classifiers:
@@ -149,40 +158,75 @@ if __name__ == "__main__":
         # print("Size of true on the whole set: %d" % (np.where(classes == 1)[0].shape[0]))
         print()
 
-    X_train, X_test, Y_train, Y_test = train_test_split(x_array, y, stratify=y)
-    darray = xgb.DMatrix(x_array, label=y)
+    # stratified xfold for xboost
+    # X_train, X_test, Y_train, Y_test = train_test_split(x_array, y, stratify=y)
+    # darray = xgb.DMatrix(x_array, label=y)
 
-    cls = xgb.XGBClassifier(
-            objective='binary:logistic',
-            n_estimators=50,
-            # scale_pos_weight=0.1,
-            # max_delta_step=1,
-            # reg_alpha=0.0030,
-            # gamma=0.003
-            )
+    # cls = xgb.XGBClassifier(
+    #         objective='binary:logistic',
+    #         n_estimators=50,
+    #         scale_pos_weight=ratio,
+    #         # max_delta_step=1,
+    #         # reg_alpha=0.0030,
+    #         # gamma=0.003
+    #         )
 
-    cls.fit(X_train, Y_train,
-            eval_set=[(X_train, Y_train), (X_test, Y_test)],
-            eval_metric='auc',
-            verbose=True)
+    # cls.fit(X_train, Y_train,
+    #         eval_set=[(X_train, Y_train), (X_test, Y_test)],
+    #         eval_metric='auc',
+    #         verbose=True)
 
-    print()
-    bst = cls.booster()
-    xgb.plot_importance(bst)
-    xgb.plot_tree(bst, num_trees=2)
-    matrix = xgb.DMatrix(scale(x_array))
-    classes_probs = bst.predict(matrix)
-    print(classes_probs.shape)
-    print(classes_probs[classes_probs >= 0.5].size)
-
+    # print()
+    # bst = cls.booster()
+    # xgb.plot_importance(bst)
+    # xgb.plot_tree(bst, num_trees=2)
+    # matrix = xgb.DMatrix(scale(x_array))
+    # classes_probs = bst.predict(matrix)
+    # print(classes_probs.shape)
+    # print(classes_probs[classes_probs >= 0.5].size)
     
+    # params = {'eval_metric': 'auc', 'objective':'binary:logistic', 'nthread':4, 'scale_pos_weight':ratio, "alpha": 0.03, 'gamama': 0.003, 'max_delta_step': 1}
+    # dtrain = xgb.DMatrix(X_train, label=Y_train)
+    # dtest = xgb.DMatrix(X_test, label=Y_test)
+    # evals = [(dtrain, 'train'), (dtest, 'test')]
+    # bst = xgb.train(params, dtrain, 50, evals=evals, verbose_eval=True)
+    # class_prob = bst.predict(darray)
+    # print("Number of qualified as true: ", class_prob[class_prob > 0.5].size)
+    # print("Number of real true: ", np.sum(y))
+    # y_2 = np.zeros(class_prob.shape[0])
+    # y_2[class_prob > 0.5] = 1
+    # print("Roc auc score: ", roc_auc_score(y, y_2))
+    # print("Recall score: ", recall_score(y, y_2))
+
+    skf = StratifiedKFold(y, n_folds=5)
     params = {'eval_metric': 'auc', 'objective':'binary:logistic', 'nthread':4, 'scale_pos_weight':ratio, "alpha": 0.03, 'gamama': 0.003, 'max_delta_step': 1}
-    dtrain = xgb.DMatrix(X_train, label=Y_train)
-    dtest = xgb.DMatrix(X_test, label=Y_test)
-    evals = [(dtrain, 'train'), (dtest, 'test')]
-    bst = xgb.train(params, dtrain, 220, evals=evals, verbose_eval=True)
-    class_prob = bst.predict(darray)
-    print(class_prob[class_prob > 0.5].size)
-    y_2 = np.zeros(class_prob.shape[0])
-    y_2[class_prob > 0.5] = 1
-    print(roc_auc_score(y, y_2))
+    rocs = []
+    recs = []
+    for train_index, test_index in skf:
+        # update ratio for training set
+        ratio = float(np.sum(y[train_index]==0) / np.sum(y[train_index]==1))
+        params["scale_pos_weight"] = ratio
+        # training and prediction
+        dtrain = xgb.DMatrix(x_array[train_index], label=y[train_index])
+        dtest = xgb.DMatrix(x_array[test_index], label=y[test_index])
+        bst = xgb.train(params, dtrain, 120, verbose_eval=False)
+        class_prob = bst.predict(dtest)
+        # scores evaluation
+        y_2 = np.zeros(y[test_index].size)
+        y_2[class_prob >= 0.5] = 1
+        roc_sc = roc_auc_score(y[test_index], y_2)
+        rec_sc = recall_score(y[test_index], y_2)
+        print("Roc auc score: ", roc_sc)
+        print("Recall score: ", rec_sc)
+        print("Number of qualified as true: ", class_prob[class_prob > 0.5].size)
+        print("Number of real true: ", np.sum(y[test_index]))
+        rocs.append(roc_sc)
+        recs.append(rec_sc)
+
+    scores_rec = np.array(recs)
+    print("Recall: {0:.2f} (+/-) {1:.3f}".format(scores_rec.mean(), scores_rec.std()))
+    print("Min: {0:.2f} Max {1:.3f}".format(scores_rec.min(), scores_rec.max()))
+
+    scores_roc = np.array(rocs)
+    print("Auc: {0:.2f} (+/-) {1:.3f}".format(scores_roc.mean(), scores_roc.std()))
+    print("Min: {0:.2f} Max {1:.3f}".format(scores_roc.min(), scores_roc.max()))
