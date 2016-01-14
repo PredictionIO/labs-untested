@@ -102,3 +102,31 @@ incorrectly
 - I have to find out why there are performance differences between these two apis
 - Then I am planning to work on features to improve performance
 - After that I'll look how it will work with other models in ensemble (I am going to check vowpal wabbit)
+
+## 14.01.2016
+It turned out that sklearn api makes predictions of terribly low precision, even for the same parameters
+  (why?). Example:
+    * Slearn:
+        Roc auc score:  0.95827618036
+        Recall score:  0.9375
+        Number of qualified as true:  23770
+        Number of real true:  16
+    * Regular api
+        Roc auc score:  0.874925927102
+        Recall score:  0.75
+        Number of qualified as true:  180
+        Number of real true:  16
+Even with slightly worse AUC score the second model is so much better.
+It's results for 5-fold cv
+    F1: 0.21 (+/-) 0.210
+    Min: 0.10 Max 0.634
+    Roc_Auc: 0.85 (+/-) 0.037
+    Min: 0.81 Max 0.906
+    Recall: 0.70 (+/-) 0.074
+    Min: 0.62 Max 0.812
+    Precision: 0.15 (+/-) 0.184
+    Min: 0.06 Max 0.520
+
+Now I am planning to define better scoring function (f1-beta) to control the precisionj too.
+Then I'll spend some time tuning parameters
+   
