@@ -54,3 +54,10 @@
 - Heavy data normalization. Forget users from last 6 months (so as to have 6 months sampling freedom since registration with complete data about conversions and views). Forget users which spent less than 500 in first 6 months since registration.
 - Unable to finish this computation... (too long)
 
+17.01.2016
+- Finished above computation...
+- have ~8500 size sample
+- Results on Decision Trees regresssion is much worse (!!)
+- Results on Elastic Net only slightly better (!)
+- HOW IS THAT POSSIBLE !?
+- Going to test xgBoost...
