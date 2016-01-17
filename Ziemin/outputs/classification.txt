@@ -1,3 +1,4 @@
+---- problem - will they spend anything in a month after first week ----
 -----------------------------------------
 AUC metrics
 
@@ -75,4 +76,114 @@ Min: 0.97 Max 0.797
 Recall: 0.68 (+/-) 0.006
 Min: 0.67 Max 0.686
 
+--------------------------------------------
+---- problem - over 5000 in first month ----
+--------------------------------------------
 
+---- Scores of XGBoost classifier (sklearn wrapper)----
+Reading data ...
+Ratio false/true =  71773.29113924051
+Testing classifiers
+---- Scores of XGBoost classifier ----
+Auc: 0.95 (+/-) 0.028
+Min: 0.92 Max 0.997
+
+---- Scores of XGBoost classifier ----
+Recall: 0.73 (+/-) 0.191
+Min: 0.44 Max 0.938
+
+-- score for model trained and tested on the whole set --
+-- XGBoostClassifier
+Number of qualified as true:  976
+Number of real true:  79
+Roc auc score:  0.949287283878
+Recall score:  0.898734177215
+
+
+---- Scores of XGBoost classifier (python api)----
+-- 5 folds in stratified KFold
+
+Recall: 0.68 (+/-) 0.092
+Min: 0.56 Max 0.812
+Auc: 0.84 (+/-) 0.046
+Min: 0.78 Max 0.906
+
+
+--- new outputs - after refactoring (trying to find the difference between
+--- sklearn and regular api)
+
+Reading data ...
+Preparing data ...
+Testing classifiers ...
+-- CV for XGBoost classifier (> 5000 problem) - sklearn --
+Roc auc score:  0.95827618036
+Recall score:  0.9375
+Number of qualified as true:  23770
+Number of real true:  16
+Roc auc score:  0.864314102598
+Recall score:  0.75
+Number of qualified as true:  24248
+Number of real true:  16
+Roc auc score:  0.953734365328
+Recall score:  0.9375
+Number of qualified as true:  34071
+Number of real true:  16
+Roc auc score:  0.832356441873
+Recall score:  0.6875
+Number of qualified as true:  25852
+Number of real true:  16
+Roc auc score:  0.887085301997
+Recall score:  0.8
+Number of qualified as true:  29303
+Number of real true:  15
+
+Recall: 0.82 (+/-) 0.100
+Min: 0.69 Max 0.938
+Auc: 0.90 (+/-) 0.050
+Min: 0.83 Max 0.958
+
+
+-- CV for XGBoost classifier (> 5000 problem) - regular --
+Roc auc score:  0.874925927102
+Recall score:  0.75
+Precision score:  0.0666666666667
+F1 score:  0.122448979592
+Number of qualified as true:  180
+Number of real true:  16
+Roc auc score:  0.812426368012
+Recall score:  0.625
+Precision score:  0.0564971751412
+F1 score:  0.103626943005
+Number of qualified as true:  177
+Number of real true:  16
+Roc auc score:  0.906244709079
+Recall score:  0.8125
+Precision score:  0.52
+F1 score:  0.634146341463
+Number of qualified as true:  25
+Number of real true:  16
+Roc auc score:  0.812429013472
+Recall score:  0.625
+Precision score:  0.0584795321637
+F1 score:  0.106951871658
+Number of qualified as true:  171
+Number of real true:  16
+Roc auc score:  0.833257937705
+Recall score:  0.666666666667
+Precision score:  0.0552486187845
+F1 score:  0.102040816327
+Number of qualified as true:  181
+Number of real true:  15
+
+F1: 0.21 (+/-) 0.210
+Min: 0.10 Max 0.634
+Roc_Auc: 0.85 (+/-) 0.037
+Min: 0.81 Max 0.906
+Recall: 0.70 (+/-) 0.074
+Min: 0.62 Max 0.812
+Precision: 0.15 (+/-) 0.184
+Min: 0.06 Max 0.520
+
+
+-- It tourned out that sklearn api makes predictions of very low precision,
+-- even though I provided the same parameters. --
