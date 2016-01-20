@@ -12,7 +12,7 @@ from sklearn import decomposition
 from scipy.sparse import lil_matrix, kron,identity
 from scipy.sparse.linalg import lsqr
 
-from pyspark.mllib.clustering import LDA, LDAModel
+from pyspark.mllib.clustering import LDA, LDAModel, GaussianMixture
 from pyspark.mllib.linalg import Vectors
 from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.stat.distribution import MultivariateGaussian
@@ -71,7 +71,7 @@ def users_as_parallelizable_sparse_data(initial_sparse_data):
 			else:
 				current_dict[item_index] = row.quantity
 			continue
-		user_number_of_purchases.append(LabeledPoint(user_index, SparseVector(item_indices.size, current_dict)))
+		user_number_of_purchases.append(SparseVector(item_indices.size, current_dict))
 		current_dict = {}
 		prev_user_id = current_user_id
 	return user_number_of_purchases
@@ -100,19 +100,39 @@ def run_latent_dirichlet_allocation(X=None):
 
 ##########################
 # using spark to run LDA
-def lda_spark(sc, X=None):
+def lda_spark(sc, X=None, clusters=3):
+	# print("==================================\n==============DEBUG===============\n==================================")
+	# print("==================================\n==================================\n==================================")
 	if X is None:
 		X = users_as_parallelizable_sparse_data(users)
 	X = sc.parallelize(X)
-	ldaModel = LDA.train(X, k=3)
+	ldaModel = LDA.train(X, k=clusters)
 	for topic in range(3):
 	    print("Topic " + str(topic) + ":")
 	    for word in range(0, ldaModel.vocabSize()):
 	        print(" " + str(topics[word][topic]))
 
-sc = pyspark.SparkContext("local", "Simple App")
+##########################
+def gmm_spark(sc, X=None, clusters=3):
+	# print("==================================\n==============DEBUG===============\n==================================")
+	# print("==================================\n==================================\n==================================")
+	if X is None:
+		X = users_as_parallelizable_sparse_data(users)
+	X = sc.parallelize(X)
+	gmm = GaussianMixture.train(X, k=clusters)
+	for i in range(2):
+		print ("weight = ", gmm.weights[i], "mu = ", gmm.gaussians[i].mu, "sigma = ", gmm.gaussians[i].sigma.toArray())
+
+
+sc = pyspark.SparkContext("local[7]", "Simple App")
+conf = pyspark.SparkConf()
+conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+conf.set("spark.storage.memoryFraction", "0.x")
+conf.set("spark.executor.cores", "70")
+conf.set("spark.executor.memory", "20G")
 
 # usr = users_as_real_vectors(users)
 # run_svd(usr)
 # run_latent_dirichlet_allocation(usr)
-lda_spark(sc)
+# lda_spark(sc)
+gmm_spark(sc)
