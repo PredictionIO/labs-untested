@@ -106,6 +106,7 @@ def lda_spark(sc, X=None, clusters=3):
 	if X is None:
 		X = users_as_parallelizable_sparse_data(users)
 	X = sc.parallelize(X)
+	X.zipWithIndex().map(lambda x: [x[1], x[0]]).cache()
 	ldaModel = LDA.train(X, k=clusters)
 	for topic in range(3):
 	    print("Topic " + str(topic) + ":")
@@ -134,5 +135,5 @@ conf.set("spark.executor.memory", "20G")
 # usr = users_as_real_vectors(users)
 # run_svd(usr)
 # run_latent_dirichlet_allocation(usr)
-# lda_spark(sc)
-gmm_spark(sc)
+lda_spark(sc)
+# gmm_spark(sc)
