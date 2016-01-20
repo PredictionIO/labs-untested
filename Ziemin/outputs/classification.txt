@@ -187,3 +187,190 @@ Min: 0.06 Max 0.520
 
 -- It tourned out that sklearn api makes predictions of very low precision,
 -- even though I provided the same parameters. --
+
+After first grid search for XGBoost classifier with fbeta score with beta = 10:
+0.6283 - [CV]  alpha=0.01, gamma=0.001, n_rounds=80, lam=1.5
+0.6283 - [CV]  alpha=0.01, gamma=0.01, n_rounds=80, lam=1.5
+0.6283 - [CV] alpha=0.01, gamma=0.01, n_rounds=80, lam=1
+0.6285 - [CV]  alpha=0.1, gamma=0.001, n_rounds=80, lam=1.5
+0.6285 - [CV]  alpha=0.1, gamma=0.005, n_rounds=80, lam=1.5
+0.6285 - [CV]  alpha=0.1, gamma=0.01, n_rounds=80, lam=1.5
+0.6286 - [CV]  alpha=0.04, gamma=0.001, n_rounds=80, lam=1.5
+0.6286 - [CV]  alpha=0.04, gamma=0.005, n_rounds=80, lam=1.5
+0.6286 - [CV] alpha=0.04, gamma=0.01, n_rounds=80, lam=1.5
+0.6399 - [CV]  alpha=0.1, gamma=0.001, n_rounds=80, lam=1
+0.6399 - [CV]  alpha=0.1, gamma=0.005, n_rounds=80, lam=1
+0.6399 - [CV]  alpha=0.1, gamma=0.01, n_rounds=80, lam=1
+0.6404 - [CV]  alpha=0.04, gamma=0.001, n_rounds=80, lam=1
+0.6404 - [CV]  alpha=0.04, gamma=0.005, n_rounds=80, lam=1
+0.6404 - [CV]  alpha=0.04, gamma=0.01, n_rounds=80, lam=1
+0.6404 - [CV]  alpha=0.01, gamma=0.001, n_rounds=80, lam=1
+0.6404 - [CV]  alpha=0.01, gamma=0.005, n_rounds=80, lam=1
+0.6404 - [CV]  alpha=0.01, gamma=0.01, n_rounds=80, lam=1
+
+After grid search on (fbeta score beta=10):
+
+    parameters = {
+            'n_rounds': [80],
+            'alpha': [.01],
+            'gamma': [.005, 0.008, 0.1],
+            # 'max_delta_step': [1, 2],
+            # 'lam': [.5, 1]
+            'max_depth': [6, 7, 8],
+            'min_child_weight': [1, 1.05, 1.1]
+            }
+
+the result is:
+{'alpha': 0.01, 'n_rounds': 80, 'min_child_weight': 1, 'gamma': 0.1, 'max_depth': 8}
+
+
+CV with chosen parameters (single XGBoost model):
+-- CV for XGBoost classifier (> 5000 problem) - regular (50 rounds)--
+Roc auc score:  0.812489418157
+Recall score:  0.625
+Precision score:  0.294117647059
+F-beta score:  0.61811505508
+Number of qualified as true:  34
+Number of real true:  16
+Roc auc score:  0.843679895293
+Recall score:  0.6875
+Precision score:  0.0647058823529
+F-beta score:  0.627683615819
+Number of qualified as true:  170
+Number of real true:  16
+Roc auc score:  0.937422840731
+Recall score:  0.875
+Precision score:  0.0740740740741
+F-beta score:  0.79038569033
+Number of qualified as true:  189
+Number of real true:  16
+Roc auc score:  0.843678131652
+Recall score:  0.6875
+Precision score:  0.0632183908046
+F-beta score:  0.62626832018
+Number of qualified as true:  174
+Number of real true:  16
+Roc auc score:  0.799926368012
+Recall score:  0.6
+Precision score:  0.0511363636364
+F-beta score:  0.542362768496
+Number of qualified as true:  176
+Number of real true:  15
+
+Precision: 0.11 (+/-) 0.093
+Min: 0.05 Max 0.294
+F-beta: 0.64 (+/-) 0.081
+Min: 0.54 Max 0.790
+Roc_Auc: 0.85 (+/-) 0.048
+Min: 0.80 Max 0.937
+Recall: 0.70 (+/-) 0.096
+Min: 0.60 Max 0.875
+
+
+-- CV for XGBoost classifier (> 5000 problem) - regular --
+    params = {
+            'eval_metric': 'auc',
+            'objective':'binary:logistic',
+            'nthread': 4,
+            "alpha": 0.04,
+            'gamma': 0.005,
+            'max_delta_step': 1,
+            'silent': 1,
+            'max_depth': 8,
+            # 'subsample': 0.95
+            }
+
+Roc auc score:  0.843687831675
+Recall score:  0.6875
+Precision score:  0.0723684210526
+F-beta score:  0.634132420091
+Number of qualified as true:  152
+Number of real true:  16
+Roc auc score:  0.937428572562
+Recall score:  0.875
+Precision score:  0.0795454545455
+F-beta score:  0.796171171171
+Number of qualified as true:  176
+Number of real true:  16
+Roc auc score:  0.781241622708
+Recall score:  0.5625
+Precision score:  0.321428571429
+F-beta score:  0.558353808354
+Number of qualified as true:  28
+Number of real true:  16
+Roc auc score:  0.749924163461
+Recall score:  0.5
+Precision score:  0.0444444444444
+F-beta score:  0.45393258427
+Number of qualified as true:  180
+Number of real true:  16
+Roc auc score:  0.933261905896
+Recall score:  0.866666666667
+Precision score:  0.0742857142857
+F-beta score:  0.783880597015
+Number of qualified as true:  175
+Number of real true:  15
+
+Recall: 0.70 (+/-) 0.153
+Min: 0.50 Max 0.875
+Precision: 0.12 (+/-) 0.102
+Min: 0.04 Max 0.321
+F-beta: 0.65 (+/-) 0.131
+Min: 0.45 Max 0.796
+Roc_Auc: 0.85 (+/-) 0.077
+Min: 0.75 Max 0.937
+
+
+-- CV for XGBoost classifier (> 5000 problem) - regular --
+    params = {
+            'eval_metric': 'auc',
+            'objective':'binary:logistic',
+            'nthread': 4,
+            "alpha": 0.04,
+            'gamma': 0.005,
+            'max_delta_step': 1,
+            'silent': 1,
+            'max_depth': 8,
+            'subsample': 0.99,
+            'eta': 0.1
+            }
+Roc auc score:  0.812433863484
+Recall score:  0.625
+Precision score:  0.0625
+F-beta score:  0.573863636364
+Number of qualified as true:  160
+Number of real true:  16
+Roc auc score:  0.843679013472
+Recall score:  0.6875
+Precision score:  0.0639534883721
+F-beta score:  0.6269751693
+Number of qualified as true:  172
+Number of real true:  16
+Roc auc score:  0.874925045281
+Recall score:  0.75
+Precision score:  0.0659340659341
+F-beta score:  0.680134680135
+Number of qualified as true:  182
+Number of real true:  16
+Roc auc score:  0.906239859067
+Recall score:  0.8125
+Precision score:  0.361111111111
+F-beta score:  0.802567237164
+Number of qualified as true:  36
+Number of real true:  16
+Roc auc score:  0.799925045281
+Recall score:  0.6
+Precision score:  0.0502793296089
+F-beta score:  0.541393686718
+Number of qualified as true:  179
+Number of real true:  15
+
+Precision: 0.12 (+/-) 0.120
+Min: 0.05 Max 0.361
+F-beta: 0.64 (+/-) 0.092
+Min: 0.54 Max 0.803
+Recall: 0.70 (+/-) 0.079
+Min: 0.60 Max 0.812
+Roc_Auc: 0.85 (+/-) 0.039
+Min: 0.80 Max 0.906
+

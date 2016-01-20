@@ -83,13 +83,24 @@ logisticRegressionWithSGD.py: AVG Test Error = 0.031689 (test data - 20%, traini
 
 13/01/2016
 1. Only 0.48% of people have not equal first_week and first_month.
-2. Prepare Spart to work on the full set of data (it's need some configuration changes).
+2. Prepare Spark to work on the full set of data (it needs some configuration changes).
 3. Tests with different classification models (different settings) and sets of features.
 4. Current results summary:
 
 SVMWithSGD, test error = 3.2%
 logisticRegressionWithSGD, test error = 2.7%
-logisticRegressionWithSBGS, test error = 4.0%
+logisticRegressionWithLBGS, test error = 4.0%
 decisionTree, test error = 0.3515%
 randomForest, test error = 0.3510%
 gradientBoostedTrees, test error = 0.3510%
+
+
+20/01/2016
+1. Get more theoretical knowledge about AUC, ROC and threshold.
+	http://stats.stackexchange.com/questions/105501/understanding-roc-curve/105577#105577
+2. Use AUC in problem of equality first week and first month purchases (classification).
+3. Prepare plot with results.
+4. Find a better threshold for AUC (linear regresssion with SGD).
+5. Current the best result is: AVG test error: 0.18% (threshold = 0.1).
+
+

@@ -130,3 +130,11 @@ It's results for 5-fold cv
 Now I am planning to define better scoring function (f1-beta) to control the precisionj too.
 Then I'll spend some time tuning parameters
    
+## 19.01.2016
+- Worked on tuning parameters with not much better results. 
+- Used grid search which ended up returning pretty much the same what I have started with.
+- I moved from AUC metrics to FBeta with beta = 10, since good results in terms of roc_auc do
+not necessarily mean very good performance (16 real true examples, over 2000 qualified as true).
+- Also tried BaggingClassifier with 10 XGBoost models. It took roughly 30 hours to complete for the settings I provied
+  and did not provide better results.
+- Used XGBoost for regression with miserable results - MSE ranging from 2000 to 5000. 

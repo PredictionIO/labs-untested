@@ -120,5 +120,11 @@ UPDATE features_ROC
 SET user_ads = 0
 WHERE user_ads is null;
 
+-- more than $5000
+ALTER TABLE features_ROC ADD COLUMN more_than BIT;
+
+UPDATE features_ROC SET
+    more_than = CAST(CASE WHEN  5000 < first_month THEN 1 ELSE 0 END AS BIT);
+
 --create file with features
 Copy (Select * From features_ROC) To '/tmp/test_ROC.csv' With CSV;

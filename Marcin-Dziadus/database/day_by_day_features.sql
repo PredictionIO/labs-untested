@@ -36,21 +36,21 @@ end;
 $$
 language plpgsql;
 
-create or replace function create_column(varchar) returns varchar as $$
+create or replace function create_column(varchar) returns void as $$
 declare
   query_create varchar := 'alter table days_features add column %s float;';
 begin
-  return format(query_create, $1, $2);
+  execute format(query_create, $1);
 end;
 $$
 language plpgsql;
 
-create or replace function update_column(varchar) returns varchar as
+create or replace function update_column(varchar) returns void as
 $$
 declare
-  query varchar := 'update %s set %s = %s.%s from %s where %s.user_id = %s.user_id';
+  query varchar := 'update days_features set %s = %s.%s from %s where days_features.user_id = %s.user_id';
 begin
-   return format(query, $1,$2,$2,$2,$2,$2,$2,$1,$2);
+   execute format(query, $1,$1,$1,$1,$1);
 end;
 $$
 language plpgsql;
@@ -86,23 +86,28 @@ begin
   execute 'create temp table days_features as select user_id from features';
   for i in low..up loop
     col_name := concat('day', i);
-    views_name := concat('views_', col_name);
-    revenues_name := concat('revenues_', col_name);
+    views_name := concat('view_', col_name);
+    revenues_name := concat('revenue_', col_name);
     begin
-      execute format('drop table if exists %s', revenues_name);
-      execute format('drop table if exists %s', views_name);
+	raise notice 'robie iteracje';
+  --    execute format('drop table if exists %s', revenues_name);
+--      execute format('drop table if exists %s', views_name);
+--	raise notice 'robie cos';
 
-      execute init_revenues_table(col_name, i-1, i);
+  --    execute init_revenues_table(revenues_name, i-1, i);
       execute init_views_table(col_name, i-1, i);
+--	raise notice 'robie cos';
 
-      execute create_column(views_name);
-      execute create_column(revenues_name);
+   --   execute create_column(views_name);
+  --    execute create_column(revenues_name);
+--	raise notice 'robie cos';
 
-      execute update_column(views_name);
-      execute update_column(revenues_name);
+   --   execute update_column(views_name);
+     -- execute update_column(revenues_name);
+	raise notice 'robie cos';
 
-      execute normalize_views(views_name);
-      execute normalize_revenues(revenues_name);
+   --   execute normalize_views(views_name);
+  --    execute normalize_revenues(revenues_name);
     end;
   end loop;
 end;
@@ -110,5 +115,5 @@ $$
 language plpgsql;
 
 select create_features(1,7);
-\copy (select days_features.*, features.month_revenue from features join days_features on features.user_id=days_features.user_id) to '/tmp/data.csv' with CSV;
+\copy (select days_features.*, features.month_revenue from features join days_features on features.user_id=days_features.user_id) to '/tmp/data.csv' with CSV header;
 
