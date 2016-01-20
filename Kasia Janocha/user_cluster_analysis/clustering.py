@@ -101,6 +101,8 @@ def run_latent_dirichlet_allocation(X=None):
 ##########################
 # using spark to run LDA
 def lda_spark(sc, X=None):
+	print("==================================\n==============DEBUG===============\n==================================")
+	print("==================================\n==================================\n==================================")
 	if X is None:
 		X = users_as_parallelizable_sparse_data(users)
 	X = sc.parallelize(X)
