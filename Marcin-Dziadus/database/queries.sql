@@ -43,6 +43,12 @@ from views
 join users
 on views.user_id=users.user_id and views.timestamp >= users.signup_time and views.timestamp - users.signup_time <= '7 days';
 
+select views.user_id, item_id, page_type
+into month_views
+from views
+join users
+on views.user_id=users.user_id and views.timestamp >= users.signup_time and views.timestamp - users.signup_time <= '7 days';
+
 select user_id, count(user_id) as adds_count
 into feature5
 from week_views
