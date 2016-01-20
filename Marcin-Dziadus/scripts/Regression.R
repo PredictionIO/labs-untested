@@ -1,34 +1,4 @@
-loadData <- function() {
-  dataDirectory <- "/home/marcin"
-  data <- read.csv(paste(dataDirectory, 'data.csv', sep="/"), header = TRUE)
-  # skip the column with user_id and convert everything to a data frame
-  frame <- data.frame(data[-1])
-}
-
-makePartition <- function(dataset, seed) {
-  set.seed(seed)
-  trainIndex <- createDataPartition(dataset$month_revenue, p = .8,
-                                    list = FALSE,
-                                    times = 1)
-}
-
-baselineApproach1 <- function(dataset) {
-  predict <- dataset$week_revenue
-  postResample(predict, dataset$month_revenue)
-}
-
-baselineApproach2 <- function(trainingData, testingData) {
-  avg <- mean(trainingData$month_revenue - trainingData$week_revenue)
-  predict <- testingData$week_revenue + avg
-  postResample(predict, testingData$month_revenue)
-}
-
-baselineApproach3 <- function(trainingData, testingData) {
-  avg <- mean(trainingData$month_revenue - trainingData$week_revenue)
-  aux <- sign(testingData$week_revenue)
-  predict <- testingData$week_revenue + aux * avg
-  postResample(predict, testingData$month_revenue)
-}
+library(caret)
 
 simpleLinearRegression <- function(trainingData, testingData) {
   trainingData$week_revenue <- trainingData$week_revenue
@@ -40,7 +10,7 @@ simpleLinearRegression <- function(trainingData, testingData) {
 
 testModels <- function(dataset) {  
   # Split data on training and testing sets.
-  idxs <- makePartition(dataset, 123)
+  idxs <- makePartition(dataset, 123, 0.8, "month_revenue")
   trainingData <- dataset[idxs,]
   testingData <- dataset[-idxs,]
   
@@ -62,34 +32,6 @@ evaluateTests <- function() {
   testModels(dataset)
 }
 
-testModels(frame)
-
-featuresCorrelation <- function(dataset) {
-  depVars <- dataset[, !(colnames(dataset) %in% c("month_revenue"))]
-  corrMatrix <- cor(depVars)
-  print(corrMatrix)
-}
-
-featuresImportanceForModel <- function(model) {
-  importance <- varImp(model, scale=FALSE)
-  print(importance)
-}
-
-featureSelection <- function(dataset) {
-  # Caused by the efficiency reasones.
-  idxs <- createDataPartition(dataset$month_revenue, p = .01,
-                                    list = FALSE,
-                                    times = 1)
-  dataSample <- dataset[idxs,]
-  
-  control <- rfeControl(functions = lmFuncs,
-                     method = "repeatedcv",
-                     repeats = 5,
-                     verbose = FALSE)
-  
-  rfe(dataSample[,-grep("month_revenue", colnames(dataSample))], dataSample$month_revenue, rfeControl = control)
-}
-
 linearRegression <- function(dataset) {
   # cross-validation
   control <- trainControl(method="cv", number=5)
@@ -97,3 +39,4 @@ linearRegression <- function(dataset) {
   predict <- predict(model, newdata=dataset)
   postResample(predict, data$month_revenue)
 }
+

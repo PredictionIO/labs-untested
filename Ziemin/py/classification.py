@@ -10,11 +10,13 @@ from sklearn.linear_model import LogisticRegression, SGDClassifier, PassiveAggre
 from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures, StandardScaler, scale
 from sklearn.pipeline import Pipeline
 from sklearn.utils import shuffle
-from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.base import BaseEstimator, TransformerMixin, ClassifierMixin
 from sklearn.ensemble import RandomForestRegressor, AdaBoostClassifier, \
         GradientBoostingClassifier, ExtraTreesClassifier, BaggingClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
-from sklearn.metrics import roc_auc_score, recall_score, precision_score, f1_score
+from sklearn.metrics import roc_auc_score, recall_score, precision_score, f1_score, \
+        fbeta_score
+from sklearn.grid_search import GridSearchCV
 import xgboost as xgb
 
 # classification for the problem:
@@ -58,6 +60,66 @@ class InterestingUsersClassifier(BaseEstimator):
 
         return y
 
+# class wrapping xgboost classifier to work correctly
+# with sklearn
+class XGBWrapper(BaseEstimator, ClassifierMixin):
+
+    def __init__(self, n_rounds=50, gamma=0.03, alpha=0.005, scale_pos_weight=None,
+            lam=1, max_delta_step=1, nthread=4, max_depth=6, silent=1, subsample=1,
+            eta=0.1, min_child_weight=1):
+
+        self.classes_ = [0, 1]
+        self.params = {
+                "n_rounds": n_rounds,
+                "gamma": gamma,
+                "alpha": alpha,
+                "max_delta_step": max_delta_step,
+                "max_depth": max_depth,
+                "nthread": nthread,
+                "lam": lam,
+                "subsample": subsample,
+                "eta": eta,
+                "min_child_weight": min_child_weight
+                }
+
+    def get_params(self, deep=True):
+        return self.params
+
+    def set_params(self, **params):
+        for key, val in params.items():
+            self.params[key] = val
+        return self
+
+    def fit(self, X, y, **fit_params):
+        params = { key:val for key, val in self.params.items() if key != "n_rounds" }
+        ratio = float(np.sum(y==0) / np.sum(y==1))
+        params["scale_pos_weight"] = ratio
+        params['objective'] = "binary:logistic"
+        params['silent'] = 1
+        params['lambda'] = params['lam']
+        del params['lam']
+
+        dtrain = xgb.DMatrix(X, label=y)
+        self.bst = xgb.train(params, dtrain, self.params["n_rounds"], verbose_eval=False)
+
+    def predict(self, X):
+        class_prob = self.predict_proba(X)[:,1]
+        y = np.zeros(X.shape[0])
+        y[class_prob >= 0.5] = 1
+        return y
+
+    def predict_proba(self, X):
+        dtest = xgb.DMatrix(X)
+        class_prob = self.bst.predict(dtest)
+        y0 = np.repeat(1.0, class_prob.size)
+        y0 -= class_prob
+
+        return np.c_[y0, class_prob]
+
+    def decision_function(self, X):
+        return self.predict_proba(X)
+
+
 def add_scaler(cls):
     return Pipeline([
         ("scaler", StandardScaler()),
@@ -100,9 +162,10 @@ classifiers = [
         # ("Baggin Logistic Classifier", add_scaler(BaggingClassifier(base_estimator=LogisticRegression(class_weight='balanced')))),
         # ("Baggin Logistic SGDC", add_scaler(BaggingClassifier(base_estimator=SGDClassifier(loss='log', penalty='elasticnet', l1_ratio=0.2, class_weight='balanced')))),
         # ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=120, scale_pos_weight=0.1, max_delta_step=1, reg_alpha=0.0020, gamma=0.002))),
-        ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=100, scale_pos_weight=71773, max_delta_step=1, reg_alpha=0.03, gamma=0.003))),
+        # ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=100, scale_pos_weight=71773, max_delta_step=1, reg_alpha=0.03, gamma=0.003))),
         # ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=4, max_delta_step=1,))),
         # ('XGBoost classifier', add_scaler(xgb.XGBClassifier( objective='binary:logistic', n_estimators=5,))),
+        ('XGBoost wrapper', XGBWrapper(n_rounds=3, max_delta_step=1, alpha=0.04, gamma=0.005)),
         ]
 
 
@@ -120,6 +183,27 @@ def get_y_more_than_5000(x_array, y_array):
     y = np.where(y_array >= 5000, 1, 0)
     return y
 
+# --------------------------------------------
+# grid search
+# --------------------------------------------
+
+def xgb_wrapper_gc(x_array, y):
+    from sklearn.metrics import make_scorer
+    scorer = make_scorer(fbeta_score, beta=10)
+    parameters = {
+            'n_rounds': [70, 80],
+            'alpha': [.01, .05],
+            'gamma': [0.007, 0.01, 0.03, 0.06, 0.1],
+            # 'max_delta_step': [1, 2],
+            # 'lam': [.5, 1]
+            'max_depth': [8],
+            'min_child_weight': [1]
+            }
+    cls = XGBWrapper()
+    gc = GridSearchCV(cls, parameters, cv=5, verbose=10, scoring='roc_auc')
+    gc.fit(x_array, y)
+    print(gc.best_params_)
+
 # ---------------------------------------------
 # testing functions
 # ---------------------------------------------
@@ -132,17 +216,21 @@ def cv_xgboost_cl_regular(x_array, y):
     params = {
             'eval_metric': 'auc',
             'objective':'binary:logistic',
-            'nthread':4,
+            'nthread': 4,
             "alpha": 0.04,
-            'gamama': 0.005,
+            'gamma': 0.005,
             'max_delta_step': 1,
-            'silent': 1
+            'silent': 1,
+            'max_depth': 7,
+            # 'subsample': 0.99,
+            'eta': 0.08,
+            # 'min_child_weight': 1.005
             }
     rocs = []
     recs = []
     precs = []
     f1s = []
-    scores_dict = { "Recall": [], "Roc_Auc": [], "Precision": [], "F1": [] }
+    scores_dict = { "Recall": [], "Roc_Auc": [], "Precision": [], "F-beta": [] }
     for train_index, test_index in skf:
         # update ratio for training set
         ratio = float(np.sum(y[train_index]==0) / np.sum(y[train_index]==1))
@@ -150,7 +238,7 @@ def cv_xgboost_cl_regular(x_array, y):
         # training and prediction
         dtrain = xgb.DMatrix(x_array[train_index], label=y[train_index])
         dtest = xgb.DMatrix(x_array[test_index], label=y[test_index])
-        bst = xgb.train(params, dtrain, 80, verbose_eval=False)
+        bst = xgb.train(params, dtrain, 100, verbose_eval=True)
         class_prob = bst.predict(dtest)
         # scores evaluation
         y_2 = np.zeros(y[test_index].size)
@@ -158,17 +246,17 @@ def cv_xgboost_cl_regular(x_array, y):
         roc_sc = roc_auc_score(y[test_index], y_2)
         rec_sc = recall_score(y[test_index], y_2)
         prec_sc = precision_score(y[test_index], y_2)
-        f1_sc = f1_score(y[test_index], y_2)
+        fb_sc = fbeta_score(y[test_index], y_2, beta=10)
         print("Roc auc score: ", roc_sc)
         print("Recall score: ", rec_sc)
         print("Precision score: ", prec_sc)
-        print("F1 score: ", f1_sc)
+        print("F-beta score: ", fb_sc)
         print("Number of qualified as true: ", class_prob[class_prob >= 0.5].size)
         print("Number of real true: ", np.sum(y[test_index]))
         scores_dict["Roc_Auc"].append(roc_sc)
         scores_dict["Recall"].append(rec_sc)
         scores_dict["Precision"].append(prec_sc)
-        scores_dict["F1"].append(f1_sc)
+        scores_dict["F-beta"].append(fb_sc)
 
     print()
     for name, scores in scores_dict.items():
@@ -177,49 +265,58 @@ def cv_xgboost_cl_regular(x_array, y):
         print("Min: {0:.2f} Max {1:.3f}".format(scores.min(), scores.max()))
 
 
-# manual cross validation with xgboost regular sklearn API
-def cv_xgboost_cl_sklearn(x_array, y):
+def cv_xgboost_cl_ensemble(x_array, y):
     print("-- CV for XGBoost classifier (> 5000 problem) - sklearn --")
 
     skf = StratifiedKFold(y, n_folds=5)
     params = {
-            'objective':'binary:logistic',
-            'nthread':4,
-            "reg_alpha": 0.04,
+            'eval_metric': 'auc',
+            'nthread': 4,
+            "alpha": 0.04,
+            'gamma': 0.005,
             'max_delta_step': 1,
-            'gamma': 0.005
+            'max_depth': 8,
+            'subsample': 0.99,
+            'eta': 0.1,
+            # 'min_child_weight': 1.02
             }
+
     rocs = []
     recs = []
-    for train_index, test_index in skf:
-        # update ratio for training set
-        ratio = float(np.sum(y[train_index]==0) / np.sum(y[train_index]==1))
-        params["scale_pos_weight"] = ratio
+    precs = []
+    f1s = []
+    scores_dict = { "Recall": [], "Roc_Auc": [], "Precision": [], "F-beta": [] }
 
-        cls = add_scaler(xgb.XGBClassifier(n_estimators=50, **params))
+    for train_index, test_index in skf:
+        cls = XGBWrapper(n_rounds=80, **params)
+        cls = BaggingClassifier(cls, 8, max_samples=0.9, n_jobs=1)
         # training and prediction
         cls.fit(x_array[train_index], y[train_index])
         class_prob = cls.predict_proba(x_array[test_index])[:,1]
         # scores evaluation
         y_2 = np.zeros(y[test_index].size)
         y_2[class_prob >= 0.5] = 1
+
         roc_sc = roc_auc_score(y[test_index], y_2)
         rec_sc = recall_score(y[test_index], y_2)
+        prec_sc = precision_score(y[test_index], y_2)
+        fb_sc = fbeta_score(y[test_index], y_2, beta=10)
         print("Roc auc score: ", roc_sc)
         print("Recall score: ", rec_sc)
+        print("Precision score: ", prec_sc)
+        print("F-beta score: ", fb_sc)
         print("Number of qualified as true: ", class_prob[class_prob >= 0.5].size)
         print("Number of real true: ", np.sum(y[test_index]))
-        rocs.append(roc_sc)
-        recs.append(rec_sc)
+        scores_dict["Roc_Auc"].append(roc_sc)
+        scores_dict["Recall"].append(rec_sc)
+        scores_dict["Precision"].append(prec_sc)
+        scores_dict["F-beta"].append(fb_sc)
 
     print()
-    scores_rec = np.array(recs)
-    print("Recall: {0:.2f} (+/-) {1:.3f}".format(scores_rec.mean(), scores_rec.std()))
-    print("Min: {0:.2f} Max {1:.3f}".format(scores_rec.min(), scores_rec.max()))
-
-    scores_roc = np.array(rocs)
-    print("Auc: {0:.2f} (+/-) {1:.3f}".format(scores_roc.mean(), scores_roc.std()))
-    print("Min: {0:.2f} Max {1:.3f}".format(scores_roc.min(), scores_roc.max()))
+    for name, scores in scores_dict.items():
+        scores = np.array(scores)
+        print("{2}: {0:.2f} (+/-) {1:.3f}".format(scores.mean(), scores.std(), name))
+        print("Min: {0:.2f} Max {1:.3f}".format(scores.min(), scores.max()))
 
 
 def run_once_xgboost(x_array, y):
@@ -287,3 +384,6 @@ if __name__ == "__main__":
 
     print("Testing classifiers ...")
     cv_xgboost_cl_regular(x_array, y)
+    # cv_xgboost_cl_ensemble(x_array, y)
+    # test_models_in_loop(x_array, y)
+    # xgb_wrapper_gc(x_array, y)
