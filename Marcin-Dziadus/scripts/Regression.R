@@ -1,42 +1,50 @@
+# Load required packages.
 library(caret)
+library(MASS)
+library(randomForest)
 
-simpleLinearRegression <- function(trainingData, testingData) {
-  trainingData$week_revenue <- trainingData$week_revenue
-  model <- lm(month_revenue ~ ., data=trainingData)
-  predict <- predict.lm(model, newdata=testingData)
-  predict <- predict + 1
-  postResample(predict, testingData$month_revenue)
+# For cross-validation purposes.
+fitControl <- trainControl(
+  method = "repeatedcv",
+  number = 4,
+  repeats = 10,
+  savePred = TRUE)
+
+linearRegressionModel <- function(dataset) {
+  partition <- makePartition(dataset, 300, 0.8, dataset$month_revenue)
+  training <- partition$training
+  testing <- partition$testing
+  
+  model <- lm(month_revenue ~ ., data=training)
+  predict <- predict(model, newdata=testing)
+  
+  featuresImportanceForModel(model)
+  postResample(predict, testing$month_revenue)
 }
 
-testModels <- function(dataset) {  
-  # Split data on training and testing sets.
-  idxs <- makePartition(dataset, 123, 0.8, "month_revenue")
-  trainingData <- dataset[idxs,]
-  testingData <- dataset[-idxs,]
+randomForestModel <- function(dataset) {
+  partition <- makePartition(dataset, 300, 0.8, dataset$month_revenue)
+  training <- partition$training
+  testing <- partition$testing
   
-  print("Rewrite the week_revenue:")
-  print(baselineApproach1(dataset))
+  model <- train(month_revenue ~ ., data = training, method="rf")
+  predict <- predict(model, newdata=testing)
   
-  print("week_revenue + the average of month_revenue with week_revenue excluded:")
-  print(baselineApproach2(trainingData, testingData))
-  
-  print("The same as previously, but only for those with positive week_revenue:")
-  print(baselineApproach3(trainingData, testingData))
-  
-  print("Linear regression:")
-  print(simpleLinearRegression(trainingData, testingData)) 
+  featuresImportanceForModel(model)
+  postResample(predict, testing$month_revenue) 
 }
 
-evaluateTests <- function() {
-  dataset <- loadData()
-  testModels(dataset)
+linearRegressionModelWithCV <- function(dataset) {
+  model <- train(month_revenue ~ ., data = dataset, trControl=fitControl, method="lm")
+  featuresImportanceForModel(model)  
+  model
 }
 
-linearRegression <- function(dataset) {
-  # cross-validation
-  control <- trainControl(method="cv", number=5)
-  model <- train(month_revenue~., data=dataset, trControl=control, method="lm")
-  predict <- predict(model, newdata=dataset)
-  postResample(predict, data$month_revenue)
+linearRegressionWithFeatureSelection <- function(dataset) {
+  model <- train(month_revenue ~ week_revenue + hour_revenue + adds_count + items_bought + discount_ratio + categories_seen,
+                 data = dataset,
+                 trControl = fitControl,
+                 method = "leapBackward")
+  featuresImportanceForModel(model)
+  model
 }
-

@@ -15,13 +15,13 @@ makePartition <- function(dataset, seed, prob, column) {
                                     times = 1)
   trainData <- dataset[trainIndexes,]
   testData <- dataset[-trainIndexes,]
-  return(list("training"=trainData, "testing"=testData))
+  list("training"=trainData, "testing"=testData)
 }
 
 featureSelection <- function(dataset) {
   # Caused by the efficiency reasones.
-  l <- makePartition(dataset, 1, .2)
-  dataSample <- l$training
+  partition <- makePartition(dataset, 1, .1, dataset$month_revenue)
+  dataSample <- partition$training
   
   control <- rfeControl(functions = lmFuncs,
                         method = "repeatedcv",
@@ -32,9 +32,8 @@ featureSelection <- function(dataset) {
 }
 
 featuresCorrelation <- function(dataset) {
-  depVars <- dataset[, !(colnames(dataset) %in% c("month_revenue"))]
+  depVars <- dataset#[, !(colnames(dataset) %in% c("month_revenue"))]
   corrMatrix <- cor(depVars)
-  print(corrMatrix)
 }
 
 featuresImportanceForModel <- function(model) {
@@ -51,21 +50,4 @@ dropColumn <- function(frame, colName) {
   frame[,!keep]
 }
 
-assignToClass <- function(prediction, cutOff) {
-  pmax(sign(prediction - cutOff), 0)
-}
-
-classificationAccuracy <- function(predictedVal, trueVal) {
-  tp <- sum(predictedVal * trueVal)
-  tn <- sum((1 - predictedVal) * (1 - trueVal))
-
-  print("recall: ")
-  print(tp / sum(trueVal))
-  
-  print("precision: ")
-  print(tp / sum(predictedVal))
-  
-  print("accuracy: ")
-  print((tp + tn) / length(trueVal))
-}
 
