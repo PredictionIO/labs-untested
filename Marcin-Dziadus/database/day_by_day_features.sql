@@ -86,28 +86,23 @@ begin
   execute 'create temp table days_features as select user_id from features';
   for i in low..up loop
     col_name := concat('day', i);
-    views_name := concat('view_', col_name);
+    views_name := concat('views_', col_name);
     revenues_name := concat('revenue_', col_name);
     begin
-	raise notice 'robie iteracje';
-  --    execute format('drop table if exists %s', revenues_name);
---      execute format('drop table if exists %s', views_name);
---	raise notice 'robie cos';
+      execute format('drop table if exists %s', revenues_name);
+      execute format('drop table if exists %s', views_name);
 
-  --    execute init_revenues_table(revenues_name, i-1, i);
+      execute init_revenues_table(revenues_name, i-1, i);
       execute init_views_table(col_name, i-1, i);
---	raise notice 'robie cos';
 
-   --   execute create_column(views_name);
-  --    execute create_column(revenues_name);
---	raise notice 'robie cos';
+      execute create_column(views_name);
+      execute create_column(revenues_name);
 
-   --   execute update_column(views_name);
-     -- execute update_column(revenues_name);
-	raise notice 'robie cos';
+      execute update_column(views_name);
+      execute update_column(revenues_name);
 
-   --   execute normalize_views(views_name);
-  --    execute normalize_revenues(revenues_name);
+      execute normalize_views(views_name);
+      execute normalize_revenues(revenues_name);
     end;
   end loop;
 end;
