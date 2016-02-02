@@ -43,6 +43,12 @@ from views
 join users
 on views.user_id=users.user_id and views.timestamp >= users.signup_time and views.timestamp - users.signup_time <= '7 days';
 
+select views.user_id, item_id, page_type
+into month_views
+from views
+join users
+on views.user_id=users.user_id and views.timestamp >= users.signup_time and views.timestamp - users.signup_time <= '7 days';
+
 select user_id, count(user_id) as adds_count
 into feature5
 from week_views
@@ -78,6 +84,8 @@ into feature8
 from discounted_conversions
 join feature4
 on discounted_conversions.user_id=feature4.user_id;
+
+insert into features select user_id from users;
 
 update features
 set hour_revenue=feature3.hour_revenue
@@ -119,6 +127,15 @@ set discount_ratio=feature8.discount_ratio
 from feature8
 where features.user_id=feature8.user_id;
 
+drop table feature1;
+drop table feature2;
+drop table feature3;
+drop table feature4;
+drop table feature5;
+drop table feature6;
+drop table feature7;
+drop table feature8;
+
 update features
 set
 	hour_revenue=round(coalesce(hour_revenue,0)::numeric,4),
@@ -129,5 +146,3 @@ set
 	categories_seen=coalesce(categories_seen,0),
 	discount_ratio=coalesce(discount_ratio,0),
 	month_revenue=round(coalesce(month_revenue,0)::numeric,4);
-
-
