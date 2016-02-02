@@ -321,7 +321,8 @@ Roc_Auc: 0.85 (+/-) 0.077
 Min: 0.75 Max 0.937
 
 
--- CV for XGBoost classifier (> 5000 problem) - regular --
+-- CV for XGBoost BaggingClassifier(15) classifier (> 5000 problem) - regular --
+
     params = {
             'eval_metric': 'auc',
             'objective':'binary:logistic',
@@ -374,3 +375,103 @@ Min: 0.60 Max 0.812
 Roc_Auc: 0.85 (+/-) 0.039
 Min: 0.80 Max 0.906
 
+Preparing data ...
+Testing classifiers ...
+-- CV for XGBoost classifier (> 5000 problem) - sklearn --
+Roc auc score:  0.906164904349
+Recall score:  0.8125
+Precision score:  0.0631067961165
+F-beta score:  0.727021040975
+Number of qualified as true:  206
+Number of real true:  16
+Roc auc score:  0.90616887254
+Recall score:  0.8125
+Precision score:  0.0659898477157
+F-beta score:  0.730662214802
+Number of qualified as true:  197
+Number of real true:  16
+Roc auc score:  0.843681658933
+Recall score:  0.6875
+Precision score:  0.066265060241
+F-beta score:  0.629105322763
+Number of qualified as true:  166
+Number of real true:  16
+Roc auc score:  0.874936068034
+Recall score:  0.75
+Precision score:  0.0764331210191
+F-beta score:  0.689812179852
+Number of qualified as true:  157
+Number of real true:  16
+Roc auc score:  0.799989418157
+Recall score:  0.6
+Precision score:  0.272727272727
+F-beta score:  0.592954990215
+Number of qualified as true:  33
+Number of real true:  15
+
+Roc_Auc: 0.87 (+/-) 0.040
+Min: 0.80 Max 0.906
+Precision: 0.11 (+/-) 0.082
+Min: 0.06 Max 0.273
+Recall: 0.73 (+/-) 0.081
+Min: 0.60 Max 0.812
+F-beta: 0.67 (+/-) 0.055
+Min: 0.59 Max 0.731
+
+
+-- CV for XGBoost Bagging classifier (> 5000 problem) - sklearn --
+xgb_params = {
+        'eval_metric': 'auc',
+        'nthread': 4,
+        "alpha": 0.04,
+        'gamma': 0.005,
+        'max_delta_step': 1,
+        'max_depth': 8,
+        'subsample': 0.99,
+        'eta': 0.1,
+        'silent': 1,
+        }
+BaggingClassifier(
+    XGBClassifierWrapper(n_rounds=80, **xgb_params),
+    15, max_samples=0.9, n_jobs=1)),
+ 
+Roc auc score:  0.812493827258
+Recall score:  0.625
+Precision score:  0.416666666667
+F-beta score:  0.621921182266
+Number of qualified as true:  24
+Number of real true:  16
+Roc auc score:  0.906165786169
+Recall score:  0.8125
+Precision score:  0.0637254901961
+F-beta score:  0.727827050998
+Number of qualified as true:  204
+Number of real true:  16
+Roc auc score:  0.874925045281
+Recall score:  0.75
+Precision score:  0.0659340659341
+F-beta score:  0.680134680135
+Number of qualified as true:  182
+Number of real true:  16
+Roc auc score:  0.874925927102
+Recall score:  0.75
+Precision score:  0.0666666666667
+F-beta score:  0.680898876404
+Number of qualified as true:  180
+Number of real true:  16
+Roc auc score:  0.866594798319
+Recall score:  0.733333333333
+Precision score:  0.0632183908046
+F-beta score:  0.663679808841
+Number of qualified as true:  174
+Number of real true:  15
+
+Roc_Auc: 0.87 (+/-) 0.030
+Min: 0.81 Max 0.906
+Recall: 0.73 (+/-) 0.061
+Min: 0.62 Max 0.812
+F-beta: 0.67 (+/-) 0.034
+Min: 0.62 Max 0.728
+Precision: 0.14 (+/-) 0.141
+Min: 0.06 Max 0.417
+es, max_depth=8
