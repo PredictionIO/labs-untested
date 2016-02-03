@@ -48,7 +48,12 @@ models = [
         # this one also has MemoryError ????
         ("ARDRegressor", ARDRegression()),
         ("SGDRegressor", SGDRegressor()),
-        ("BaggingLinearRegr", BaggingRegressor(LinearRegression())),
+        ("SGDRegressor2", SGDRegressor(
+            penalty='elasticnet', l1_ratio=0.08, alpha=0.0001)),
+        ("BaggingLinearRegr", BaggingRegressor(
+            LinearRegression(), n_estimators=18, max_samples=0.8, max_features=0.9)),
+        ("BaggingRidge", BaggingRegressor(
+            Ridge(alpha=0.05), n_estimators=25, max_samples=0.85, max_features=0.9)),
         ("BaggingDecisionTree", BaggingRegressor(DecisionTreeRegressor())),
         ("ClusteringLinRegr", ClusteringEnsemble()),
         ("FirstWeekEnsemble", FirstWeek0Ensemble()),

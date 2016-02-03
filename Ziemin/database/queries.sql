@@ -364,7 +364,8 @@ WHERE features.user_id = subquery.user_id;
 -- * theme
 -- this query will be used to build vectors of features counting the number of
 -- time user bought from some category, personality, style, theme
--- it is saved to csv for further processing
+-- it is saved to csv for further processing. Can be done like this:
+-- \copy (the entire query) to './items.csv' WITH DELIMITER '|' NULL '';
 
 SELECT u.user_id, i.personality, i.style, i.theme, i.category
     FROM users u INNER JOIN conversions c ON u.user_id = c.user_id

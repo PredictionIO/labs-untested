@@ -17,11 +17,11 @@ xgb_params = {
         'eval_metric': 'auc',
         'nthread': 4,
         "alpha": 0.04,
-        'gamma': 0.005,
+        'gamma': 0.008,
         'max_delta_step': 1,
-        'max_depth': 8,
-        'subsample': 0.99,
-        'eta': 0.1,
+        'max_depth': 6,
+        # 'subsample': 0.99,
+        'eta': 0.09,
         'silent': 1,
         }
 
@@ -45,10 +45,10 @@ models = [
         ("BaggingLogisticSGDC",
             BaggingClassifier(base_estimator=SGDClassifier(
                 loss='log', penalty='elasticnet', l1_ratio=0.2, class_weight='balanced'))),
-        ('XGBoost', XGBClassifierWrapper(n_rounds=80, **xgb_params)),
+        ('XGBoost', XGBClassifierWrapper(n_rounds=60, **xgb_params)),
         ('BaggedXGBoost', BaggingClassifier(
-            XGBClassifierWrapper(n_rounds=80, **xgb_params),
-            15, max_samples=0.9, n_jobs=1)),
+            XGBClassifierWrapper(n_rounds=60, **xgb_params),
+            10, max_samples=0.9, n_jobs=1)),
         ]
 
 
