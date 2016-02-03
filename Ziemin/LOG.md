@@ -135,6 +135,11 @@ Then I'll spend some time tuning parameters
 - Used grid search which ended up returning pretty much the same what I have started with.
 - I moved from AUC metrics to FBeta with beta = 10, since good results in terms of roc_auc do
 not necessarily mean very good performance (16 real true examples, over 2000 qualified as true).
-- Also tried BaggingClassifier with 10 XGBoost models. It took roughly 30 hours to complete for the settings I provied
+- Also tried BaggingClassifier with 10 XGBoost models. It took roughly 30 hours to complete for the settings I provided
   and did not provide better results.
 - Used XGBoost for regression with miserable results - MSE ranging from 2000 to 5000. 
+
+## 01.02.2016
+- Tried BaggingClassifier again with better parameters and 15 ensembles. It resulted in results with better precision
+  and lower std dev
+- Refactored code and provided a lot more convenient means to run and test different models for different problems

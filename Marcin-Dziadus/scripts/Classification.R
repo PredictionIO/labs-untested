@@ -1,54 +1,73 @@
+# Load required packages.
 library(gam)
 library(nnet)
+library(klaR)
+library(glmnet)
 
-classifyWithGlm <- function(dataset, formula, cutOff) {
-  samples <- makePartition(frame, 1, 0.5, frame$class)$training
+positiveMonthRevenue <- function(data) {
+  factor(ifelse(data$month_revenue > 0, 1, 0))
+}
   
-  model <- glm(formula=dataset$class ~ . , data = samples, family="binomial")
-  probs <- predict(model, newdata=dataset, type="response")
+positiveMonthRevenueWithFirstWeekExcluded <- function(data) {
+  factor(ifelse(data$month_revenue > data$week_revenue, 1, 0))
+}
   
-  prediction <- assignToClass(probs, cutOff)
-  classificationAccuracy(prediction, frame$class)
+revenueBiggerThan5000 <- function(data) {
+  factor(ifelse(data$month_revenue > 5000, 1, 0))
 }
 
-classifyWithGam <- function(dataset, formula, cutOff) {
-  samples <- makePartition(frame, 1, 0.2, frame$class)$training
-
-  model <- gam(formula=formula , data = samples, family="binomial")
-  probs <- predict(model, newdata=dataset, type="response")
-  
-  prediction <- assignToClass(probs, cutOff)
-  classificationAccuracy(prediction, frame$class)
-}
-
-classifyWithNnet <- function(dataset, formula, cutOff) {  
-  samples <- makePartition(frame, 1, 0.2, frame$class)$training
-  
-  model <- multinom(formula=formula , data = samples, family="binomial")
-  probs <- predict(model, newdata=dataset, type="probs")
-  
-  prediction <- assignToClass(probs, frame$class)
-  classificationAccuracy(as.numeric(prediction), frame$class)  
-}
-
-prepareForClassification <- function(data, fun) {
+prepareFrameForClassification <- function(data, classifier) {
   frame <- dropColumn(data,"month_revenue")
-  frame$class <- fun(data)
+  frame$class <- classifier(data)
   frame
 }
 
-positiveMonthRevenue <- function(data) {
-  sign(data$month_revenue)
-}
-
-positiveMonthRevenueWithFirstWeekExcluded <- function(data) {
-  sign(data$month_revenue - data$week_revenue)
-}
-
-evaluate <- function(data) {
-  formula <- class ~ adds_count + items_bought + categories_seen + log(week_revenue+1) + 
-    log(revenue_day1+1) + log(revenue_day2+1) + log(revenue_day3+1)+ log(revenue_day4+1)+ log(revenue_day5+1)+ log(revenue_day6+1)+ log(revenue_day7+1)
+measureClassifierPerformance <- function(prediction, labels) {
+  sens <- sensitivity(prediction, labels)
+  cat(sprintf("sensitivity: %f\n", auc(sens)))
   
-  classifyWithGam(prepareForClassification(data,positiveMonthRevenue), formula, 0.1)
+  spec <- specificity(prediction, labels)
+  cat(sprintf("specificity: %f\n", auc(spec)))
+  
+  roc <- roc(prediction, labels)
+  cat(sprintf("roc: %f\n", auc(roc)))
+  
+  plot(roc)
+}
+
+classifyWithGlm <- function(dataset) {  
+  partition <- makePartition(dataset, 1, 0.8, dataset$class)
+  training <- partition$training
+  testing <- partition$testing
+  
+  model <- glm(class ~ ., data = training, family="binomial")
+  prediction <- predict(model, newdata=testing, type="response")
+  
+  measureClassifierPerformance(prediction, testing$class)
+  return(model)
+}
+
+classifyWithGam <- function(dataset) {
+  partition <- makePartition(dataset, 1, 0.8, dataset$class)
+  training <- partition$training
+  testing <- partition$testing
+  
+  model <- gam(class ~ ., data = training, family="binomial")
+  prediction <- predict(model, newdata=testing, type="response")
+  
+  measureClassifierPerformance(prediction, testing$class)
+  return(model)
+}
+
+classifyWithNnet <- function(dataset) {  
+  partition <- makePartition(dataset, 1, 0.8, dataset$class)
+  training <- partition$training
+  testing <- partition$testing
+  
+  model <- multinom(class ~ ., data = training)
+  prediction <- predict(model, newdata=testing, type="probs")
+  
+  measureClassifierPerformance(prediction, testing$class)
+  return(model)
 }
 

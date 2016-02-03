@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.decomposition import PCA, TruncatedSVD, IncrementalPCA, RandomizedPCA
 
+# these is the odering of the columns or groups of columns in relevant features 
+# table from SQL database
 column_names = [
         "user_id",
         "y",
@@ -15,12 +17,12 @@ column_names = [
         "avg_view_price",
         "viewed_bought_count",
         "has_seen_ad",
-        "country",
+        "country",      # a string
         "regist_day_of_year"
-        "utm_source",
-        "utm_campaign",
-        "utm_medium",
-        "utm_content"
+        "utm_source",   # many 0,1 columns
+        "utm_campaign", # many 0,1 columns
+        "utm_medium",   # many 0,1 columns
+        "utm_content"   # many 0,1 columns
     ]
 
 # reversed bindings
@@ -54,10 +56,12 @@ def prepare_input_files(features_csv, out_dir, usecols):
     np.save(out_file_x, x_array)
     np.save(out_file_y, y_array)
 
-# prepares one hot encoded features for some column from features table
+# prepares one hot encoded features for some column from features SQL table
 # columns: country, utm_source, utm_medium
 # assumes that input file is sorted by user_id
 def prepare_categorical_features(features_csv, out_dir):
+    # currently in encodes utm_medium
+    # modify usecols and output path name to one_hot_encode different column
     array = np.loadtxt(features_csv, delimiter='|', usecols=[15], dtype=np.str_)
 
     le = LabelEncoder()
@@ -79,6 +83,7 @@ def reduce_data(features, out_dir, dim=10, first_column=True):
     ipca = IncrementalPCA(n_components=dim, copy=False, batch_size=500000)
     ipca.fit_transform(subarray)
     new_array = subarray
+    # when it cannot fit into memory do it incrementally like below
     # new_array_1 = tsvd.fit_transform(subarray[:1500000, :])
     # new_array_2 = tsvd.fit_transform(subarray[1500000:3400000, :])
     # new_array_3 = tsvd.fit_transform(subarray[3400000:, :])
@@ -128,6 +133,11 @@ def prepare_items_features(user_items_csv, out_dir):
     np.save(os.path.join(out_dir, "user_items"), array)
 
 
+# this function creates X array from:
+# - the original features.csv files
+# - an array of # *.npy arrays (features_npy) - reduced binary features to lower dimension
+# - user_items.npy array as created above
+# Then it concatenates all the features and serializes the array to out_dir
 def concatenate_features(features_csv, features_npys, user_items_npy, out_dir):
     x_array = np.loadtxt(features_csv, delimiter='|', usecols=[0]+curr_cols)
     for f in features_npys:
