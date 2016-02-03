@@ -61,3 +61,10 @@
 - Results on Elastic Net only slightly better (!)
 - HOW IS THAT POSSIBLE !?
 - Going to test xgBoost...
+
+27.01.2016
+- Tested XGBoost
+- Very nice library comparing to SciKit. Better customization. Feel more power.
+- But I can hardly find any improvement.
+- Can improve very slightly manually adjusting lambda and alpha parameters (score by ~0.005)
+
