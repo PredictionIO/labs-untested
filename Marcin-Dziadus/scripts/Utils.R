@@ -1,9 +1,8 @@
 library(caret)
 
-loadData <- function(file_name) {
-  # [TODO]: The data_directory should not be hardcoded.
-  data_directory <- '/home/marcin/fb'
-  data <- read.csv(paste(data_directory, file_name, sep="/"), header = TRUE)
+loadData <- function(fileName) {
+  # The file should be in the same directory as that script.
+  data <- read.csv(paste(fileName, sep="/"), header = TRUE)
   # skip the column with user_id and convert everything to a data frame
   frame <- data.frame(data[-1])
 }
@@ -18,22 +17,36 @@ makePartition <- function(dataset, seed, prob, column) {
   list("training"=trainData, "testing"=testData)
 }
 
+# For cross-validation purposes.
+fitControl <- function(number, repeats) {
+  trainControl(
+    method = "repeatedcv",
+    number = number,
+    repeats = repeats,
+    savePred = TRUE)
+}
+
 featureSelection <- function(dataset) {
-  # Caused by the efficiency reasones.
-  partition <- makePartition(dataset, 1, .1, dataset$month_revenue)
-  dataSample <- partition$training
-  
   control <- rfeControl(functions = lmFuncs,
                         method = "repeatedcv",
                         repeats = 5,
                         verbose = FALSE)
   
-  rfe(dataSample[,-grep("month_revenue", colnames(dataSample))], dataSample$month_revenue, rfeControl = control)
+  cols <- c("week_revenue","hour_revenue","revenue_day1","views_day1","views_day2","views_day3",
+             "items_bought", "adds_count", "categories_seen", "categories_bought", "discount_ratio")
+  results <- rfe(dataset[,cols],
+                 dataset$month_revenue,
+                 rfeControl = control,
+                 size = 6)
+  print(results)
+  predictors(results)
+  plot(results, type = c("o", "g"))
 }
 
 featuresCorrelation <- function(dataset) {
-  depVars <- dataset#[, !(colnames(dataset) %in% c("month_revenue"))]
-  corrMatrix <- cor(depVars)
+  corrMatrix <- cor(dataset)
+  highlyCorrelated <- findCorrelation(corrMatrix, cutoff=0.75)
+  print(highlyCorrelated)
 }
 
 featuresImportanceForModel <- function(model) {
@@ -41,13 +54,7 @@ featuresImportanceForModel <- function(model) {
   print(importance)
 }
 
-sanitize <- function(pred) {
-  pmax(pred,0)
-}
-
 dropColumn <- function(frame, colName) {
   keep <- names(frame) %in% c(colName)
   frame[,!keep]
 }
-
-
