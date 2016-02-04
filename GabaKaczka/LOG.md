@@ -1,3 +1,4 @@
+<br />
 Used libraries:<br />
 - Matplotlib,<br />
 - Seaborn,<br />
@@ -16,6 +17,7 @@ Workplan:<br />
 <br />
 Problems solved. How to:<br />
 - drop malformed data,<br />
+- generate plot (virtual machine),<br />
 - do scatter plots with bubbles,<br />
 - use strings as ticks on labels,<br />
 - improve layout so that everything is visible,<br />
