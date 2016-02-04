@@ -12,12 +12,12 @@ Workplan:<br />
 4. Plots types and libraries - research.<br />
 4. Titling and layer setting.<br />
 5. Removing malformed data (solving problem with empty values).<br />
-6. Generating plots.<br />
+6. Generating plots and writing docs.<br />
 7. Research on Bayesian Methods.<br /> 
 <br />
 Problems solved. How to:<br />
 - drop malformed data,<br />
-- generate plot (virtual machine),<br />
+- generate plots on the whole set of data (virtual machine),<br />
 - do scatter plots with bubbles,<br />
 - use strings as ticks on labels,<br />
 - improve layout so that everything is visible,<br />
