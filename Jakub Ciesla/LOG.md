@@ -103,4 +103,3 @@ gradientBoostedTrees, test error = 0.3510%
 4. Find a better threshold for AUC (linear regresssion with SGD).
 5. Current the best result is: AVG test error: 0.18% (threshold = 0.1).
 
-
